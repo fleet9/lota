@@ -12,51 +12,132 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f0f4f8; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1a202c; }
-        .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-        .btn-primary { background: #1a56db; border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.65rem 1.25rem; font-size: 0.9rem; transition: background 0.2s; }
-        .btn-primary:hover { background: #1e429f; }
-        .btn-secondary { background: #f8fafc; border: 1px solid #e2e8f0; color: #374151; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.65rem 1.25rem; font-size: 0.9rem; }
-        .btn-danger { background: #dc2626; border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; }
-        .btn-success { background: #059669; border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; }
-        input, select, textarea { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a202c; padding: 0.65rem 0.85rem; width: 100%; font-size: 0.9rem; outline: none; transition: border 0.2s; }
-        input:focus, select:focus, textarea:focus { border-color: #1a56db; background: #fff; }
-        input::placeholder, textarea::placeholder { color: #a0aec0; }
-        label { color: #4a5568; font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
-        .sidebar-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: #374151; transition: all 0.15s; }
-        .sidebar-item:hover { background: #f1f5f9; color: #1a56db; }
-        .sidebar-item.active { background: #eff6ff; color: #1a56db; font-weight: 700; }
+        body { background: linear-gradient(135deg, #0f1f2e 0%, #0d2137 40%, #0a1f1a 100%); min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #e2e8f0; }
+        
+        .card { 
+            background: rgba(255,255,255,0.04); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,210,180,0.12); 
+            border-radius: 16px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.05) inset; 
+        }
+        .card-float {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(0,210,180,0.15);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset, 0 0 0 1px rgba(0,210,180,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-float:hover { transform: translateY(-2px); box-shadow: 0 28px 70px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08) inset; }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, #00d4b4, #00a896); 
+            border: none; color: #0a1f1a; font-weight: 700; cursor: pointer; border-radius: 10px; 
+            padding: 0.65rem 1.25rem; font-size: 0.9rem; 
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,212,180,0.3);
+        }
+        .btn-primary:hover { background: linear-gradient(135deg, #00e8c8, #00baa8); box-shadow: 0 6px 20px rgba(0,212,180,0.45); transform: translateY(-1px); }
+        .btn-secondary { 
+            background: rgba(255,255,255,0.06); 
+            border: 1px solid rgba(255,255,255,0.12); 
+            color: #cbd5e1; font-weight: 600; cursor: pointer; border-radius: 10px; 
+            padding: 0.65rem 1.25rem; font-size: 0.9rem;
+            transition: all 0.2s;
+            backdrop-filter: blur(8px);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(0,210,180,0.3); color: #00d4b4; }
+        .btn-danger { 
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; 
+            padding: 0.5rem 1rem; font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+            transition: all 0.2s;
+        }
+        .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(239,68,68,0.4); }
+        .btn-success { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; 
+            padding: 0.5rem 1rem; font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+            transition: all 0.2s;
+        }
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16,185,129,0.4); }
+
+        input, select, textarea { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,210,180,0.03)); 
+            border: 1px solid rgba(0,210,180,0.15); 
+            border-radius: 10px; color: #e2e8f0; 
+            padding: 0.7rem 0.9rem; width: 100%; font-size: 0.9rem; outline: none; 
+            transition: all 0.2s;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+            backdrop-filter: blur(8px);
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: rgba(0,212,180,0.5); 
+            background: rgba(0,210,180,0.06);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.2), 0 0 0 3px rgba(0,212,180,0.1);
+        }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
+        select option { background: #0d2137; color: #e2e8f0; }
+        
+        label { color: rgba(0,212,180,0.8); font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        
+        .sidebar-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 10px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.5); transition: all 0.2s; }
+        .sidebar-item:hover { background: rgba(0,210,180,0.08); color: #00d4b4; }
+        .sidebar-item.active { background: rgba(0,210,180,0.12); color: #00d4b4; font-weight: 700; border-left: 3px solid #00d4b4; box-shadow: 0 4px 15px rgba(0,210,180,0.1); }
         .sidebar-item i { width: 18px; text-align: center; }
-        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-        .badge-green { background: #d1fae5; color: #065f46; }
-        .badge-red { background: #fee2e2; color: #991b1b; }
-        .badge-yellow { background: #fef3c7; color: #92400e; }
-        .badge-blue { background: #dbeafe; color: #1e40af; }
-        .badge-gray { background: #f1f5f9; color: #475569; }
-        .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; }
-        .table-row { display: grid; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; align-items: center; font-size: 0.875rem; }
-        .table-row:hover { background: #f8fafc; }
-        .table-head { background: #f8fafc; border-bottom: 2px solid #e2e8f0; font-weight: 700; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-        .section-header { font-size: 1rem; font-weight: 700; color: #1a202c; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .divider { border: none; border-top: 1px solid #e2e8f0; margin: 0.75rem 0; }
+        
+        .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; }
+        .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+        .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .badge-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+        .badge-blue { background: rgba(0,210,180,0.12); color: #00d4b4; border: 1px solid rgba(0,210,180,0.2); }
+        .badge-gray { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.08); }
+        
+        .stat-card { 
+            background: rgba(255,255,255,0.04); 
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,210,180,0.1); 
+            border-radius: 16px; padding: 1.25rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.04) inset;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,210,180,0.1); }
+        
+        .table-row { display: grid; padding: 0.8rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; font-size: 0.875rem; transition: background 0.15s; }
+        .table-row:hover { background: rgba(0,210,180,0.04); }
+        .table-head { background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(0,210,180,0.1); font-weight: 700; font-size: 0.72rem; color: rgba(0,210,180,0.7); text-transform: uppercase; letter-spacing: 0.07em; }
+        
+        .section-header { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .divider { border: none; border-top: 1px solid rgba(0,210,180,0.08); margin: 0.75rem 0; }
+        
         .p-4 { padding: 1rem; }
         .p-5 { padding: 1.25rem; }
         .p-6 { padding: 1.5rem; }
         .p-8 { padding: 2rem; }
         .mb-6 { margin-bottom: 1.5rem; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,210,180,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,210,180,0.4); }
     </style>
 </head>
 <body>
 
 <!-- Login -->
-<div id="loginScreen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1e3a5f 0%,#1a56db 100%);padding:1rem;">
-    <div style="background:white;border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+<div id="loginScreen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f1f2e 0%,#0d2137 50%,#0a1f1a 100%);padding:1rem;position:relative;overflow:hidden;"><div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,210,180,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;"></div><div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(0,150,210,0.05) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none;"></div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border:1px solid rgba(0,210,180,0.15);border-radius:24px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,0.6),0 1px 0 rgba(255,255,255,0.08) inset;position:relative;z-index:1;">
         <div style="text-align:center;margin-bottom:2rem;">
-            <div style="width:64px;height:64px;background:linear-gradient(135deg,#1a56db,#1e3a5f);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,#00d4b4,#00a896);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 8px 24px rgba(0,212,180,0.4);">
                 <i class="fas fa-taxi" style="font-size:1.8rem;color:white;"></i>
             </div>
-            <h1 style="font-size:1.6rem;font-weight:900;color:#1a202c;letter-spacing:-0.5px;">L.O.T.A</h1>
-            <p style="color:#64748b;font-size:0.875rem;margin-top:0.25rem;">Local Operations Taxi Association</p>
+            <h1 style="font-size:1.6rem;font-weight:900;color:#00d4b4;letter-spacing:2px;text-shadow:0 0 30px rgba(0,212,180,0.4);">L.O.T.A</h1>
+            <p style="color:rgba(255,255,255,0.4);font-size:0.875rem;margin-top:0.25rem;">Local Operations Taxi Association</p>
         </div>
         <div style="margin-bottom:1rem;">
             <label>Username</label>
@@ -69,7 +150,7 @@
         <button onclick="lotaLogin()" class="btn-primary" style="width:100%;padding:0.85rem;font-size:1rem;">
             <i class="fas fa-sign-in-alt"></i> Sign In
         </button>
-        <p style="text-align:center;color:#94a3b8;font-size:0.75rem;margin-top:1.5rem;">L.O.T.A Management System v1.0</p>
+        <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:0.75rem;margin-top:1.5rem;">L.O.T.A Management System v1.0</p>
     </div>
 </div>
 
@@ -77,44 +158,44 @@
 
 <!-- Main App -->
 <div id="mainApp" style="display:none;min-height:100vh;">
-    <nav style="background:white;border-bottom:1px solid #e2e8f0;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+    <nav style="background:rgba(10,25,40,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,210,180,0.1);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
         <div style="display:flex;align-items:center;gap:1rem;">
-            <div style="width:36px;height:36px;background:linear-gradient(135deg,#1a56db,#1e3a5f);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#00d4b4,#00a896);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,212,180,0.3);">
                 <i class="fas fa-taxi" style="color:white;font-size:1rem;"></i>
             </div>
-            <span style="font-weight:800;color:#1a202c;">L.O.T.A</span>
-            <span style="color:#94a3b8;font-size:0.75rem;">Management System</span>
+            <span style="font-weight:800;color:#00d4b4;letter-spacing:1px;">L.O.T.A</span>
+            <span style="color:rgba(255,255,255,0.3);font-size:0.75rem;">Management System</span>
         </div>
         <div style="display:flex;align-items:center;gap:1rem;">
-            <div id="lotaClock" style="color:#64748b;font-size:0.85rem;font-weight:500;"></div>
-            <span id="navUsername" style="color:#374151;font-size:0.875rem;font-weight:600;"></span>
-            <button onclick="lotaLogout()" style="background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;padding:0.4rem 0.85rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div id="lotaClock" style="color:rgba(0,212,180,0.7);font-size:0.85rem;font-weight:600;font-variant-numeric:tabular-nums;"></div>
+            <span id="navUsername" style="color:rgba(255,255,255,0.7);font-size:0.875rem;font-weight:600;"></span>
+            <button onclick="lotaLogout()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:0.4rem 0.85rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(0,210,180,0.3)';this.style.color='#00d4b4'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)'"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </nav>
     <div style="display:flex;min-height:calc(100vh - 60px);">
-        <aside style="width:220px;background:white;border-right:1px solid #e2e8f0;padding:1rem;flex-shrink:0;overflow-y:auto;">
-            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Main</p>
+        <aside style="width:220px;background:rgba(8,20,32,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid rgba(0,210,180,0.08);padding:1rem;flex-shrink:0;overflow-y:auto;">
+            <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Main</p>
             <div class="sidebar-item active" onclick="showModule('dashboard',this)"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
             <hr class="divider">
-            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Operations</p>
+            <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Operations</p>
             <div class="sidebar-item" onclick="showModule('queue',this)"><i class="fas fa-list-ol"></i> Rank & Queue</div>
             <div class="sidebar-item" onclick="showModule('routes',this)"><i class="fas fa-route"></i> Routes</div>
             <hr class="divider">
-            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Administration</p>
+            <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Administration</p>
             <div class="sidebar-item" onclick="showModule('members',this)"><i class="fas fa-id-card"></i> Members</div>
             <div class="sidebar-item" onclick="showModule('vehicles',this)"><i class="fas fa-bus"></i> Vehicles</div>
             <div class="sidebar-item" onclick="showModule('drivers',this)"><i class="fas fa-user-tie"></i> Drivers</div>
             <hr class="divider">
-            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Finance & Governance</p>
+            <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Finance & Governance</p>
             <div class="sidebar-item" onclick="showModule('finance',this)"><i class="fas fa-money-bill-wave"></i> Finance</div>
             <div class="sidebar-item" onclick="showModule('governance',this)"><i class="fas fa-landmark"></i> Governance</div>
             <hr class="divider">
-            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Compliance</p>
+            <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Compliance</p>
             <div class="sidebar-item" onclick="showModule('incidents',this)"><i class="fas fa-exclamation-triangle"></i> Incidents</div>
             <div class="sidebar-item" onclick="showModule('communications',this)"><i class="fas fa-bullhorn"></i> Communications</div>
             <div class="sidebar-item" onclick="showModule('analytics',this)"><i class="fas fa-chart-bar"></i> Analytics</div>
         </aside>
-        <main style="flex:1;padding:1.5rem;overflow-y:auto;background:#f0f4f8;">
+        <main style="flex:1;padding:1.5rem;overflow-y:auto;background:transparent;">
             <div id="mod-dashboard"><div class="card p-6"><p style="color:#64748b;">Loading dashboard...</p></div></div>
             <div id="mod-queue" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading queue...</p></div></div>
             <div id="mod-routes" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading routes...</p></div></div>
@@ -186,18 +267,18 @@ async function loadDashboard() {
     const fees = (fRes.data||[]).reduce((s,t)=>s+parseFloat(t.amount||0),0);
     const queue = qRes.data||[];
     document.getElementById('mod-dashboard').innerHTML = `
-    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;color:#1a202c;">Dashboard</h2><p style="color:#64748b;font-size:0.875rem;">L.O.T.A operations overview</p></div>
+    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;color:#1a202c;">Dashboard</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">L.O.T.A operations overview</p></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Members</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${(mRes.data||[]).length}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Vehicles</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${(vRes.data||[]).length}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">In Queue</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${queue.length}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Drivers</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${(dRes.data||[]).length}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Open Incidents</p><p style="font-size:2rem;font-weight:900;color:#dc2626;">${(iRes.data||[]).length}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Fees This Month</p><p style="font-size:2rem;font-weight:900;color:#059669;">R${fees.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Members</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${(mRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Vehicles</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${(vRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">In Queue</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${queue.length}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Drivers</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${(dRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Open Incidents</p><p style="font-size:2rem;font-weight:900;color:#dc2626;">${(iRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Fees This Month</p><p style="font-size:2rem;font-weight:900;color:#059669;">R${fees.toFixed(2)}</p></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="card p-5"><div class="section-header"><i class="fas fa-list-ol" style="color:#1a56db;"></i> Live Queue</div>
-        ${queue.length===0?'<p style="color:#94a3b8;font-size:0.875rem;">No taxis in queue</p>':queue.slice(0,5).map((q,i)=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.85rem;font-weight:600;">#${i+1} ${q.plate_number}</span><span style="font-size:0.8rem;color:#64748b;">${q.route_label}</span><span class="badge badge-${q.status==='loading'?'yellow':'green'}">${q.status}</span></div>`).join('')}
+        <div class="card p-5"><div class="section-header"><i class="fas fa-list-ol" style="color:#00d4b4;"></i> Live Queue</div>
+        ${queue.length===0?'<p style="color:rgba(255,255,255,0.25);font-size:0.875rem;">No taxis in queue</p>':queue.slice(0,5).map((q,i)=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.85rem;font-weight:600;">#${i+1} ${q.plate_number}</span><span style="font-size:0.8rem;color:#64748b;">${q.route_label}</span><span class="badge badge-${q.status==='loading'?'yellow':'green'}">${q.status}</span></div>`).join('')}
         </div>
         <div class="card p-5"><div class="section-header"><i class="fas fa-exclamation-circle" style="color:#dc2626;"></i> Quick Actions</div>
             <div style="display:flex;flex-direction:column;gap:0.75rem;">
@@ -220,11 +301,11 @@ async function loadMembers() {
 function renderModuleMembers() {
     document.getElementById('mod-members').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Membership Administration</h2><p style="color:#64748b;font-size:0.875rem;">Members, fees and status</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Membership Administration</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Members, fees and status</p></div>
         <button onclick="showMemberForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Member</button>
     </div>
     <div id="memberForm" class="card p-6 mb-6" style="display:none;">
-        <div class="section-header"><i class="fas fa-user-plus" style="color:#1a56db;"></i> New Member</div>
+        <div class="section-header"><i class="fas fa-user-plus" style="color:#00d4b4;"></i> New Member</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
             <div><label>Full Name</label><input id="mName" placeholder="Full name"></div>
             <div><label>ID Number</label><input id="mId" placeholder="SA ID number"></div>
@@ -251,7 +332,7 @@ function renderModuleMembers() {
     </div></div>
     <div class="card" style="overflow:hidden;">
         <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 80px;"><span>Member</span><span>Type</span><span>Permit</span><span>Fee</span><span>Status</span><span>Disciplinary</span><span></span></div>
-        <div id="membersList">${allMembers.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No members yet</div>':allMembers.map(m=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${m.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${m.phone||''}</p></div><span class="badge badge-blue">${m.member_type||''}</span><span style="font-size:0.85rem;">${m.permit_number||'—'}</span><span style="color:#059669;font-weight:600;">R${parseFloat(m.membership_fee||0).toFixed(2)}</span><span class="badge badge-${m.status==='active'?'green':m.status==='suspended'?'red':'yellow'}">${m.status}</span><button onclick="deleteMember('${m.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
+        <div id="membersList">${allMembers.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No members yet</div>':allMembers.map(m=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${m.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${m.phone||''}</p></div><span class="badge badge-blue">${m.member_type||''}</span><span style="font-size:0.85rem;">${m.permit_number||'—'}</span><span style="color:#059669;font-weight:600;">R${parseFloat(m.membership_fee||0).toFixed(2)}</span><span class="badge badge-${m.status==='active'?'green':m.status==='suspended'?'red':'yellow'}">${m.status}</span><button onclick="deleteMember('${m.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
     </div>`;
 }
 
@@ -282,11 +363,11 @@ function renderModuleVehicles() {
     const now=new Date();
     document.getElementById('mod-vehicles').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Vehicle Administration</h2><p style="color:#64748b;font-size:0.875rem;">Fleet, licensing and compliance</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Vehicle Administration</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Fleet, licensing and compliance</p></div>
         <button onclick="showVehicleForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Vehicle</button>
     </div>
     <div id="vehicleForm" class="card p-6 mb-6" style="display:none;">
-        <div class="section-header"><i class="fas fa-bus" style="color:#1a56db;"></i> Register Vehicle</div>
+        <div class="section-header"><i class="fas fa-bus" style="color:#00d4b4;"></i> Register Vehicle</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
             <div><label>Plate</label><input id="vPlate" placeholder="CA 123-456" style="text-transform:uppercase;"></div>
             <div><label>Make & Model</label><input id="vModel" placeholder="Toyota Quantum"></div>
@@ -311,7 +392,7 @@ function renderModuleVehicles() {
     </div>
     <div class="card" style="overflow:hidden;">
         <div class="table-row table-head" style="grid-template-columns:1.5fr 1.5fr 1fr 1fr 1fr 1fr 80px;"><span>Vehicle</span><span>Owner</span><span>Route</span><span>Licence</span><span>Insurance</span><span>Status</span><span></span></div>
-        <div id="vehiclesList">${allVehicles.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No vehicles yet</div>':allVehicles.map(v=>{
+        <div id="vehiclesList">${allVehicles.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No vehicles yet</div>':allVehicles.map(v=>{
             const licExp=v.licence_expiry?new Date(v.licence_expiry):null;
             const insExp=v.insurance_expiry?new Date(v.insurance_expiry):null;
             const warn30=new Date(now.getTime()+30*24*60*60*1000);
@@ -339,11 +420,11 @@ function renderModuleDrivers(){
     const now=new Date();
     document.getElementById('mod-drivers').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Driver Administration</h2><p style="color:#64748b;font-size:0.875rem;">Profiles, permits and conduct</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Driver Administration</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Profiles, permits and conduct</p></div>
         <button onclick="showDriverForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Driver</button>
     </div>
     <div id="driverForm" class="card p-6 mb-6" style="display:none;">
-        <div class="section-header"><i class="fas fa-user-tie" style="color:#1a56db;"></i> Add Driver</div>
+        <div class="section-header"><i class="fas fa-user-tie" style="color:#00d4b4;"></i> Add Driver</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
             <div><label>Full Name</label><input id="dName" placeholder="Full name"></div>
             <div><label>ID Number</label><input id="dId" placeholder="SA ID number"></div>
@@ -366,7 +447,7 @@ function renderModuleDrivers(){
     </div>
     <div class="card" style="overflow:hidden;">
         <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Driver</span><span>Role</span><span>Vehicle</span><span>PDP Expiry</span><span>Status</span><span></span></div>
-        <div>${allDrivers.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No drivers yet</div>':allDrivers.map(d=>{const pdpExp=d.pdp_expiry?new Date(d.pdp_expiry):null;const warn=pdpExp&&pdpExp<new Date(now.getTime()+30*24*60*60*1000);return `<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${d.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${d.phone||''}</p></div><span class="badge badge-blue">${d.role||'driver'}</span><span style="font-size:0.85rem;">${d.vehicle_plate||'—'}</span><span style="font-size:0.8rem;color:${warn?'#dc2626':'#374151'};">${pdpExp?pdpExp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${d.status==='active'?'green':d.status==='suspended'?'red':'yellow'}">${d.status}</span><button onclick="deleteDriver('${d.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`;}).join('')}</div>
+        <div>${allDrivers.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No drivers yet</div>':allDrivers.map(d=>{const pdpExp=d.pdp_expiry?new Date(d.pdp_expiry):null;const warn=pdpExp&&pdpExp<new Date(now.getTime()+30*24*60*60*1000);return `<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${d.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${d.phone||''}</p></div><span class="badge badge-blue">${d.role||'driver'}</span><span style="font-size:0.85rem;">${d.vehicle_plate||'—'}</span><span style="font-size:0.8rem;color:${warn?'#dc2626':'#374151'};">${pdpExp?pdpExp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${d.status==='active'?'green':d.status==='suspended'?'red':'yellow'}">${d.status}</span><button onclick="deleteDriver('${d.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`;}).join('')}</div>
     </div>`;
 }
 function showDriverForm(){const f=document.getElementById('driverForm');if(f)f.style.display='block';}
@@ -385,7 +466,7 @@ async function loadRoutes(){
     ['vRoute','qRoute'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<option value="">Select route...</option>'+allRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} → ${r.to_location}</option>`).join('');});
     document.getElementById('mod-routes').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Route Administration</h2><p style="color:#64748b;font-size:0.875rem;">Permissions, schedules and allocations</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Route Administration</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Permissions, schedules and allocations</p></div>
         <button onclick="showRouteForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Route</button>
     </div>
     <div id="routeForm" class="card p-6 mb-6" style="display:none;">
@@ -408,7 +489,7 @@ async function loadRoutes(){
     </div>
     <div class="card" style="overflow:hidden;">
         <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Route</span><span>Fare</span><span>Permit</span><span>Hours</span><span>Status</span><span></span></div>
-        <div>${allRoutes.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No routes yet</div>':allRoutes.map(r=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${r.from_location} → ${r.to_location}</p><p style="font-size:0.78rem;color:#64748b;">${r.distance_km?r.distance_km+'km':''}</p></div><span style="color:#059669;font-weight:700;">R${parseFloat(r.fare||0).toFixed(2)}</span><span style="font-size:0.85rem;">${r.permit_number||'—'}</span><span style="font-size:0.85rem;">${r.operating_hours||'—'}</span><span class="badge badge-${r.status==='active'?'green':r.status==='disputed'?'yellow':'red'}">${r.status}</span><button onclick="deleteRoute('${r.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
+        <div>${allRoutes.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No routes yet</div>':allRoutes.map(r=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${r.from_location} → ${r.to_location}</p><p style="font-size:0.78rem;color:#64748b;">${r.distance_km?r.distance_km+'km':''}</p></div><span style="color:#059669;font-weight:700;">R${parseFloat(r.fare||0).toFixed(2)}</span><span style="font-size:0.85rem;">${r.permit_number||'—'}</span><span style="font-size:0.85rem;">${r.operating_hours||'—'}</span><span class="badge badge-${r.status==='active'?'green':r.status==='disputed'?'yellow':'red'}">${r.status}</span><button onclick="deleteRoute('${r.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
     </div>`;
 }
 function showRouteForm(){const f=document.getElementById('routeForm');if(f)f.style.display='block';}
@@ -427,7 +508,7 @@ async function loadQueue(){
     const sorted=[...allQueue].sort((a,b)=>({'waiting':0,'loading':1,'full':2}[a.status]||0)-({'waiting':0,'loading':1,'full':2}[b.status]||0));
     document.getElementById('mod-queue').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Rank & Queue Operations</h2><p style="color:#64748b;font-size:0.875rem;">Live queue and departures</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Rank & Queue Operations</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Live queue and departures</p></div>
         <button onclick="showQueueForm()" class="btn-primary"><i class="fas fa-plus"></i> Add to Queue</button>
     </div>
     <div id="queueForm" class="card p-6 mb-6" style="display:none;">
@@ -442,17 +523,17 @@ async function loadQueue(){
             <button onclick="document.getElementById('queueForm').style.display='none'" class="btn-secondary">Cancel</button>
         </div>
     </div>
-    ${sorted.length===0?'<div class="card p-8" style="text-align:center;color:#94a3b8;"><i class="fas fa-bus" style="font-size:2rem;display:block;margin-bottom:1rem;"></i>No taxis in queue</div>':sorted.map((q,i)=>{
+    ${sorted.length===0?'<div class="card p-8" style="text-align:center;color:rgba(255,255,255,0.25);"><i class="fas fa-bus" style="font-size:2rem;display:block;margin-bottom:1rem;"></i>No taxis in queue</div>':sorted.map((q,i)=>{
         const pct=Math.round((q.seats_filled/q.capacity)*100);const isNext=i===0;
-        return `<div class="card" style="padding:1.25rem;margin-bottom:0.75rem;${isNext?'border-left:4px solid #1a56db;':''}">
+        return `<div class="card" style="padding:1.25rem;margin-bottom:0.75rem;${isNext?'border-left:4px solid #00d4b4;box-shadow:-4px 0 16px rgba(0,210,180,0.2);':''}">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
                 <div style="display:flex;align-items:center;gap:0.75rem;">
-                    ${isNext?'<span class="badge badge-blue">NEXT</span>':`<span style="color:#94a3b8;">#${i+1}</span>`}
-                    <div><p style="font-weight:700;">${q.plate_number}</p><p style="font-size:0.82rem;color:#64748b;">${q.route_label}${q.driver_name?' • '+q.driver_name:''}${q.marshal_name?' • Marshal: '+q.marshal_name:''}</p></div>
+                    ${isNext?'<span class="badge badge-blue">NEXT</span>':`<span style="color:rgba(255,255,255,0.25);">#${i+1}</span>`}
+                    <div><p style="font-weight:700;">${q.plate_number}</p><p style="font-size:0.82rem;color:rgba(255,255,255,0.45);">${q.route_label}${q.driver_name?' • '+q.driver_name:''}${q.marshal_name?' • Marshal: '+q.marshal_name:''}</p></div>
                 </div>
-                <div style="text-align:right;"><p style="font-size:1.5rem;font-weight:900;color:#1a56db;">${q.seats_filled}/${q.capacity}</p><span class="badge badge-${q.status==='loading'?'yellow':q.status==='full'?'red':'green'}">${q.status.toUpperCase()}</span></div>
+                <div style="text-align:right;"><p style="font-size:1.5rem;font-weight:900;color:#00d4b4;">${q.seats_filled}/${q.capacity}</p><span class="badge badge-${q.status==='loading'?'yellow':q.status==='full'?'red':'green'}">${q.status.toUpperCase()}</span></div>
             </div>
-            <div style="background:#f1f5f9;border-radius:6px;height:8px;overflow:hidden;margin-bottom:0.75rem;"><div style="background:#1a56db;height:100%;width:${pct}%;border-radius:6px;transition:width 0.5s;"></div></div>
+            <div style="background:#f1f5f9;border-radius:6px;height:8px;overflow:hidden;margin-bottom:0.75rem;"><div style="background:linear-gradient(135deg,#00d4b4,#00a896);height:100%;width:${pct}%;border-radius:6px;transition:width 0.5s;"></div></div>
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                 ${q.status!=='full'?`<button onclick="updateSeats('${q.id}',${q.seats_filled},${q.capacity},1)" class="btn-success" style="padding:0.35rem 0.75rem;font-size:0.8rem;"><i class="fas fa-plus"></i> Seat</button><button onclick="updateSeats('${q.id}',${q.seats_filled},${q.capacity},-1)" class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;"><i class="fas fa-minus"></i> Seat</button><button onclick="markDeparted('${q.id}')" style="background:#d97706;border:none;color:white;padding:0.35rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;"><i class="fas fa-road"></i> Departed</button>`:''}
                 <button onclick="removeFromQueue('${q.id}')" class="btn-danger" style="padding:0.35rem 0.75rem;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
@@ -483,7 +564,7 @@ async function loadFinance(){
     const fines=txns.filter(t=>t.type==='fine').reduce((s,t)=>s+parseFloat(t.amount||0),0);
     document.getElementById('mod-finance').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Financial Administration</h2><p style="color:#64748b;font-size:0.875rem;">Fees, fines and reconciliation</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Financial Administration</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Fees, fines and reconciliation</p></div>
         <button onclick="showFinanceForm()" class="btn-primary"><i class="fas fa-plus"></i> Record Transaction</button>
     </div>
     <div id="financeForm" class="card p-6 mb-6" style="display:none;">
@@ -503,15 +584,15 @@ async function loadFinance(){
         </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Income</p><p style="font-size:1.5rem;font-weight:900;color:#059669;">R${income.toFixed(2)}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Expenses</p><p style="font-size:1.5rem;font-weight:900;color:#dc2626;">R${expenses.toFixed(2)}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Fines</p><p style="font-size:1.5rem;font-weight:900;color:#d97706;">R${fines.toFixed(2)}</p></div>
-        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Net</p><p style="font-size:1.5rem;font-weight:900;color:#1a56db;">R${(income-expenses).toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Income</p><p style="font-size:1.5rem;font-weight:900;color:#059669;">R${income.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Expenses</p><p style="font-size:1.5rem;font-weight:900;color:#dc2626;">R${expenses.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Fines</p><p style="font-size:1.5rem;font-weight:900;color:#d97706;">R${fines.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Net</p><p style="font-size:1.5rem;font-weight:900;color:#00d4b4;">R${(income-expenses).toFixed(2)}</p></div>
     </div>
     <div class="card" style="overflow:hidden;">
         <div style="padding:1rem;border-bottom:1px solid #e2e8f0;"><select id="finFilter" onchange="loadFinance()" style="width:auto;"><option value="month">This Month</option><option value="week">This Week</option><option value="all">All Time</option></select></div>
         <div class="table-row table-head" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span>Date</span><span>Description</span><span>Member</span><span>Type</span><span>Amount</span><span>Method</span></div>
-        <div>${txns.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No transactions</div>':txns.map(t=>`<div class="table-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${new Date(t.created_at).toLocaleDateString('en-ZA')}</span><span style="font-size:0.85rem;font-weight:500;">${t.description||'—'}</span><span style="font-size:0.85rem;">${t.member_name||'—'}</span><span class="badge badge-${t.type==='expense'?'red':t.type==='fine'?'yellow':'green'}">${t.type.replace('_',' ')}</span><span style="font-weight:700;color:${t.type==='expense'?'#dc2626':'#059669'};">R${parseFloat(t.amount||0).toFixed(2)}</span><span style="font-size:0.8rem;color:#64748b;">${t.payment_method||''}</span></div>`).join('')}</div>
+        <div>${txns.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No transactions</div>':txns.map(t=>`<div class="table-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${new Date(t.created_at).toLocaleDateString('en-ZA')}</span><span style="font-size:0.85rem;font-weight:500;">${t.description||'—'}</span><span style="font-size:0.85rem;">${t.member_name||'—'}</span><span class="badge badge-${t.type==='expense'?'red':t.type==='fine'?'yellow':'green'}">${t.type.replace('_',' ')}</span><span style="font-weight:700;color:${t.type==='expense'?'#dc2626':'#059669'};">R${parseFloat(t.amount||0).toFixed(2)}</span><span style="font-size:0.8rem;color:#64748b;">${t.payment_method||''}</span></div>`).join('')}</div>
     </div>`;
 }
 function showFinanceForm(){const f=document.getElementById('financeForm');if(f)f.style.display='block';}
@@ -528,7 +609,7 @@ async function loadMeetings(){
     const meetings=data||[];
     document.getElementById('mod-governance').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Governance & Meetings</h2><p style="color:#64748b;font-size:0.875rem;">Notices, minutes and resolutions</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Governance & Meetings</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Notices, minutes and resolutions</p></div>
         <button onclick="showMeetingForm()" class="btn-primary"><i class="fas fa-plus"></i> New Meeting</button>
     </div>
     <div id="meetingForm" class="card p-6 mb-6" style="display:none;">
@@ -551,7 +632,7 @@ async function loadMeetings(){
     </div>
     <div class="card" style="overflow:hidden;">
         <div class="table-row table-head" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 80px;"><span>Date</span><span>Type</span><span>Venue</span><span>Chair</span><span>Status</span><span></span></div>
-        <div>${meetings.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No meetings recorded</div>':meetings.map(m=>`<div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${m.meeting_date?new Date(m.meeting_date).toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-blue">${m.meeting_type}</span><span style="font-size:0.85rem;">${m.venue||'—'}</span><span style="font-size:0.85rem;">${m.chairperson||'—'}</span><span class="badge badge-${m.status==='completed'?'green':m.status==='cancelled'?'red':'yellow'}">${m.status}</span><button onclick="viewMeeting('${m.id}')" class="btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-eye"></i></button></div>`).join('')}</div>
+        <div>${meetings.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No meetings recorded</div>':meetings.map(m=>`<div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${m.meeting_date?new Date(m.meeting_date).toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-blue">${m.meeting_type}</span><span style="font-size:0.85rem;">${m.venue||'—'}</span><span style="font-size:0.85rem;">${m.chairperson||'—'}</span><span class="badge badge-${m.status==='completed'?'green':m.status==='cancelled'?'red':'yellow'}">${m.status}</span><button onclick="viewMeeting('${m.id}')" class="btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-eye"></i></button></div>`).join('')}</div>
     </div>`;
 }
 function showMeetingForm(){const f=document.getElementById('meetingForm');if(f)f.style.display='block';}
@@ -569,7 +650,7 @@ async function loadIncidents(){
     const {data}=await query;const incidents=data||[];
     document.getElementById('mod-incidents').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Incident & Disciplinary System</h2><p style="color:#64748b;font-size:0.875rem;">Disputes, complaints and case tracking</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Incident & Disciplinary System</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Disputes, complaints and case tracking</p></div>
         <button onclick="showIncidentForm()" class="btn-primary"><i class="fas fa-plus"></i> Log Incident</button>
     </div>
     <div id="incidentForm" class="card p-6 mb-6" style="display:none;">
@@ -594,7 +675,7 @@ async function loadIncidents(){
     <div class="card" style="overflow:hidden;">
         <div style="padding:1rem;border-bottom:1px solid #e2e8f0;"><select id="incidentFilter" onchange="loadIncidents()" style="width:auto;"><option value="all">All</option><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>
         <div class="table-row table-head" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span>Date</span><span>Description</span><span>Member</span><span>Type</span><span>Status</span><span>Severity</span></div>
-        <div>${incidents.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No incidents</div>':incidents.map(i=>`<div class="table-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${new Date(i.created_at).toLocaleDateString('en-ZA')}</span><span style="font-size:0.85rem;">${(i.description||'').substring(0,50)}${(i.description||'').length>50?'...':''}</span><span style="font-size:0.85rem;">${i.member_name||'—'}</span><span class="badge badge-blue">${i.incident_type}</span><span class="badge badge-${i.status==='open'?'red':i.status==='resolved'?'green':'yellow'}">${i.status}</span><span class="badge badge-${i.severity==='critical'?'red':i.severity==='high'?'yellow':'gray'}">${i.severity}</span></div>`).join('')}</div>
+        <div>${incidents.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No incidents</div>':incidents.map(i=>`<div class="table-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${new Date(i.created_at).toLocaleDateString('en-ZA')}</span><span style="font-size:0.85rem;">${(i.description||'').substring(0,50)}${(i.description||'').length>50?'...':''}</span><span style="font-size:0.85rem;">${i.member_name||'—'}</span><span class="badge badge-blue">${i.incident_type}</span><span class="badge badge-${i.status==='open'?'red':i.status==='resolved'?'green':'yellow'}">${i.status}</span><span class="badge badge-${i.severity==='critical'?'red':i.severity==='high'?'yellow':'gray'}">${i.severity}</span></div>`).join('')}</div>
     </div>`;
 }
 function showIncidentForm(){const f=document.getElementById('incidentForm');if(f)f.style.display='block';}
@@ -611,7 +692,7 @@ async function loadNotices(){
     const notices=data||[];
     document.getElementById('mod-communications').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div><h2 style="font-size:1.3rem;font-weight:800;">Communication Layer</h2><p style="color:#64748b;font-size:0.875rem;">Announcements and operational notices</p></div>
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Communication Layer</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Announcements and operational notices</p></div>
         <button onclick="showCommForm()" class="btn-primary"><i class="fas fa-plus"></i> New Notice</button>
     </div>
     <div id="commForm" class="card p-6 mb-6" style="display:none;">
@@ -628,7 +709,7 @@ async function loadNotices(){
             <button onclick="document.getElementById('commForm').style.display='none'" class="btn-secondary">Cancel</button>
         </div>
     </div>
-    ${notices.length===0?'<div class="card p-8" style="text-align:center;color:#94a3b8;">No notices sent yet</div>':notices.map(n=>`<div class="card" style="padding:1.25rem;margin-bottom:0.75rem;border-left:4px solid ${n.priority==='urgent'?'#dc2626':n.priority==='high'?'#d97706':'#1a56db'};"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;"><div><p style="font-weight:700;">${n.title}</p><div style="display:flex;gap:0.5rem;margin-top:0.25rem;"><span class="badge badge-blue">${n.notice_type}</span><span class="badge badge-${n.priority==='urgent'?'red':n.priority==='high'?'yellow':'gray'}">${n.priority}</span></div></div><span style="font-size:0.78rem;color:#94a3b8;">${new Date(n.created_at).toLocaleString('en-ZA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div><p style="font-size:0.875rem;color:#374151;">${n.message}</p></div>`).join('')}`;
+    ${notices.length===0?'<div class="card p-8" style="text-align:center;color:rgba(255,255,255,0.25);">No notices sent yet</div>':notices.map(n=>`<div class="card" style="padding:1.25rem;margin-bottom:0.75rem;border-left:4px solid ${n.priority==='urgent'?'#dc2626':n.priority==='high'?'#d97706':'#1a56db'};"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;"><div><p style="font-weight:700;">${n.title}</p><div style="display:flex;gap:0.5rem;margin-top:0.25rem;"><span class="badge badge-blue">${n.notice_type}</span><span class="badge badge-${n.priority==='urgent'?'red':n.priority==='high'?'yellow':'gray'}">${n.priority}</span></div></div><span style="font-size:0.78rem;color:rgba(255,255,255,0.25);">${new Date(n.created_at).toLocaleString('en-ZA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div><p style="font-size:0.875rem;color:rgba(255,255,255,0.6);">${n.message}</p></div>`).join('')}`;
 }
 function showCommForm(){const f=document.getElementById('commForm');if(f)f.style.display='block';}
 async function addNotice(){
@@ -650,9 +731,9 @@ async function loadAnalytics(){
     const income=finance.filter(f=>['membership_fee','income','collection'].includes(f.type)).reduce((s,f)=>s+parseFloat(f.amount||0),0);
     const expenses=finance.filter(f=>f.type==='expense').reduce((s,f)=>s+parseFloat(f.amount||0),0);
     document.getElementById('mod-analytics').innerHTML=`
-    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;">Reporting & Analytics</h2><p style="color:#64748b;font-size:0.875rem;">Operational trends and audit reports</p></div>
+    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;">Reporting & Analytics</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Operational trends and audit reports</p></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-        <div class="card p-5"><div class="section-header"><i class="fas fa-users" style="color:#1a56db;"></i> Member Activity</div>
+        <div class="card p-5"><div class="section-header"><i class="fas fa-users" style="color:#00d4b4;"></i> Member Activity</div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Active</span><span class="badge badge-green">${members.filter(m=>m.status==='active').length}</span></div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Suspended</span><span class="badge badge-red">${members.filter(m=>m.status==='suspended').length}</span></div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;"><span style="font-size:0.875rem;">Total</span><span class="badge badge-blue">${members.length}</span></div>
@@ -660,10 +741,10 @@ async function loadAnalytics(){
         <div class="card p-5"><div class="section-header"><i class="fas fa-money-bill" style="color:#059669;"></i> Fee Compliance</div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Total Income</span><span style="color:#059669;font-weight:700;">R${income.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Total Expenses</span><span style="color:#dc2626;font-weight:700;">R${expenses.toFixed(2)}</span></div>
-            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;"><span style="font-size:0.875rem;">Net</span><span style="color:#1a56db;font-weight:700;">R${(income-expenses).toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;"><span style="font-size:0.875rem;">Net</span><span style="color:#00d4b4;font-weight:700;">R${(income-expenses).toFixed(2)}</span></div>
         </div>
-        <div class="card p-5"><div class="section-header"><i class="fas fa-route" style="color:#1a56db;"></i> Route Activity</div>
-            ${routes.length===0?'<p style="color:#94a3b8;">No routes</p>':routes.map(r=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">${r.from_location} → ${r.to_location}</span><span class="badge badge-${r.status==='active'?'green':'red'}">${r.status}</span></div>`).join('')}
+        <div class="card p-5"><div class="section-header"><i class="fas fa-route" style="color:#00d4b4;"></i> Route Activity</div>
+            ${routes.length===0?'<p style="color:rgba(255,255,255,0.25);">No routes</p>':routes.map(r=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">${r.from_location} → ${r.to_location}</span><span class="badge badge-${r.status==='active'?'green':'red'}">${r.status}</span></div>`).join('')}
         </div>
         <div class="card p-5"><div class="section-header"><i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i> Incident Trends</div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Open</span><span class="badge badge-red">${incidents.filter(i=>i.status==='open').length}</span></div>
