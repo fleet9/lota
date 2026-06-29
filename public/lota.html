@@ -235,6 +235,9 @@ function renderModuleMembers() {
             <div><label>Permit Number</label><input id="mPermit" placeholder="Operating permit"></div>
             <div><label>Join Date</label><input id="mJoinDate" type="date"></div>
             <div><label>Status</label><select id="mStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="pending">Pending</option></select></div>
+            <div><label>Disciplinary Status</label><select id="mDisciplinary"><option value="clear">Clear</option><option value="warning">Warning</option><option value="suspended">Suspended</option><option value="expelled">Expelled</option></select></div>
+            <div><label>Onboarding Date</label><input id="mOnboarding" type="date"></div>
+            <div style="grid-column:1/-1;"><label>Notes</label><textarea id="mNotes" placeholder="Additional notes..." style="height:60px;resize:vertical;"></textarea></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addMember()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
@@ -247,7 +250,7 @@ function renderModuleMembers() {
         <select id="memberTypeFilter" onchange="filterMembers()" style="width:auto;"><option value="all">All Types</option><option value="owner">Owners</option><option value="driver">Drivers</option><option value="committee">Committee</option></select>
     </div></div>
     <div class="card" style="overflow:hidden;">
-        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Member</span><span>Type</span><span>Permit</span><span>Fee</span><span>Status</span><span></span></div>
+        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 80px;"><span>Member</span><span>Type</span><span>Permit</span><span>Fee</span><span>Status</span><span>Disciplinary</span><span></span></div>
         <div id="membersList">${allMembers.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No members yet</div>':allMembers.map(m=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${m.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${m.phone||''}</p></div><span class="badge badge-blue">${m.member_type||''}</span><span style="font-size:0.85rem;">${m.permit_number||'—'}</span><span style="color:#059669;font-weight:600;">R${parseFloat(m.membership_fee||0).toFixed(2)}</span><span class="badge badge-${m.status==='active'?'green':m.status==='suspended'?'red':'yellow'}">${m.status}</span><button onclick="deleteMember('${m.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
     </div>`;
 }
@@ -262,7 +265,7 @@ function filterMembers() {
 }
 async function addMember() {
     const name=document.getElementById('mName').value.trim(); if(!name){alert('Name required');return;}
-    const {error}=await window.sb.from('lota_members').insert([{full_name:name,id_number:document.getElementById('mId').value.trim(),phone:document.getElementById('mPhone').value.trim(),email:document.getElementById('mEmail').value.trim(),member_type:document.getElementById('mType').value,membership_fee:parseFloat(document.getElementById('mFee').value)||0,permit_number:document.getElementById('mPermit').value.trim(),join_date:document.getElementById('mJoinDate').value||null,status:document.getElementById('mStatus').value}]);
+    const {error}=await window.sb.from('lota_members').insert([{full_name:name,id_number:document.getElementById('mId').value.trim(),phone:document.getElementById('mPhone').value.trim(),email:document.getElementById('mEmail').value.trim(),member_type:document.getElementById('mType').value,membership_fee:parseFloat(document.getElementById('mFee').value)||0,permit_number:document.getElementById('mPermit').value.trim(),join_date:document.getElementById('mJoinDate').value||null,status:document.getElementById('mStatus').value,disciplinary_status:document.getElementById('mDisciplinary').value,onboarding_date:document.getElementById('mOnboarding').value||null,notes:document.getElementById('mNotes').value.trim()}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('memberForm').style.display='none';
     await loadMembers();
@@ -296,6 +299,10 @@ function renderModuleVehicles() {
             <div><label>Next Inspection</label><input id="vInspection" type="date"></div>
             <div><label>Permit</label><input id="vPermit" placeholder="Permit number"></div>
             <div><label>Status</label><select id="vStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="unroadworthy">Unroadworthy</option></select></div>
+            <div><label>Inspection Status</label><select id="vInspectionStatus"><option value="passed">Passed</option><option value="failed">Failed</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></div>
+            <div><label>Last Inspection Date</label><input id="vLastInspection" type="date"></div>
+            <div><label>Previous Owners</label><input id="vPrevOwners" placeholder="Previous owner names"></div>
+            <div style="grid-column:1/-1;"><label>Compliance Notes</label><textarea id="vComplianceNotes" placeholder="Compliance reminders and notes..." style="height:60px;resize:vertical;"></textarea></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addVehicle()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
@@ -316,7 +323,7 @@ function showVehicleForm(){const f=document.getElementById('vehicleForm');if(f)f
 async function addVehicle(){
     const plate=document.getElementById('vPlate').value.trim().toUpperCase();if(!plate){alert('Plate required');return;}
     const ownerSel=document.getElementById('vOwner');const routeSel=document.getElementById('vRoute');
-    const {error}=await window.sb.from('lota_vehicles').insert([{plate_number:plate,make_model:document.getElementById('vModel').value.trim(),year:parseInt(document.getElementById('vYear').value)||null,owner_id:ownerSel.value||null,owner_name:ownerSel.options[ownerSel.selectedIndex]?.text||'',route_id:routeSel.value||null,route_label:routeSel.options[routeSel.selectedIndex]?.text||'',capacity:parseInt(document.getElementById('vCapacity').value)||15,licence_expiry:document.getElementById('vLicence').value||null,insurance_expiry:document.getElementById('vInsurance').value||null,next_inspection:document.getElementById('vInspection').value||null,permit_number:document.getElementById('vPermit').value.trim(),status:document.getElementById('vStatus').value}]);
+    const {error}=await window.sb.from('lota_vehicles').insert([{plate_number:plate,make_model:document.getElementById('vModel').value.trim(),year:parseInt(document.getElementById('vYear').value)||null,owner_id:ownerSel.value||null,owner_name:ownerSel.options[ownerSel.selectedIndex]?.text||'',route_id:routeSel.value||null,route_label:routeSel.options[routeSel.selectedIndex]?.text||'',capacity:parseInt(document.getElementById('vCapacity').value)||15,licence_expiry:document.getElementById('vLicence').value||null,insurance_expiry:document.getElementById('vInsurance').value||null,next_inspection:document.getElementById('vInspection').value||null,permit_number:document.getElementById('vPermit').value.trim(),status:document.getElementById('vStatus').value,inspection_status:document.getElementById('vInspectionStatus').value,last_inspection:document.getElementById('vLastInspection').value||null,previous_owners:document.getElementById('vPrevOwners').value.trim(),compliance_notes:document.getElementById('vComplianceNotes').value.trim()}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('vehicleForm').style.display='none';await loadVehicles();
 }
@@ -347,6 +354,10 @@ function renderModuleDrivers(){
             <div><label>PDP Expiry</label><input id="dPdpExpiry" type="date"></div>
             <div><label>Licence Code</label><input id="dLicence" placeholder="e.g. C1"></div>
             <div><label>Status</label><select id="dStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="inactive">Inactive</option></select></div>
+            <div><label>Conduct Rating</label><select id="dConduct"><option value="excellent">Excellent</option><option value="good">Good</option><option value="fair">Fair</option><option value="poor">Poor</option></select></div>
+            <div><label>Suspension Start</label><input id="dSuspStart" type="date"></div>
+            <div><label>Suspension End</label><input id="dSuspEnd" type="date"></div>
+            <div style="grid-column:1/-1;"><label>Notes</label><textarea id="dNotes" placeholder="Conduct records, incidents..." style="height:60px;resize:vertical;"></textarea></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addDriver()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
@@ -362,7 +373,7 @@ function showDriverForm(){const f=document.getElementById('driverForm');if(f)f.s
 async function addDriver(){
     const name=document.getElementById('dName').value.trim();if(!name){alert('Name required');return;}
     const vSel=document.getElementById('dVehicle');
-    const {error}=await window.sb.from('lota_drivers').insert([{full_name:name,id_number:document.getElementById('dId').value.trim(),phone:document.getElementById('dPhone').value.trim(),role:document.getElementById('dRole').value,vehicle_id:vSel.value||null,vehicle_plate:vSel.options[vSel.selectedIndex]?.dataset?.plate||'',pdp_number:document.getElementById('dPdp').value.trim(),pdp_expiry:document.getElementById('dPdpExpiry').value||null,licence_code:document.getElementById('dLicence').value.trim(),status:document.getElementById('dStatus').value}]);
+    const {error}=await window.sb.from('lota_drivers').insert([{full_name:name,id_number:document.getElementById('dId').value.trim(),phone:document.getElementById('dPhone').value.trim(),role:document.getElementById('dRole').value,vehicle_id:vSel.value||null,vehicle_plate:vSel.options[vSel.selectedIndex]?.dataset?.plate||'',pdp_number:document.getElementById('dPdp').value.trim(),pdp_expiry:document.getElementById('dPdpExpiry').value||null,licence_code:document.getElementById('dLicence').value.trim(),status:document.getElementById('dStatus').value,conduct_rating:document.getElementById('dConduct').value,suspension_start:document.getElementById('dSuspStart').value||null,suspension_end:document.getElementById('dSuspEnd').value||null,notes:document.getElementById('dNotes').value.trim()}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('driverForm').style.display='none';await loadDrivers();
 }
@@ -387,6 +398,8 @@ async function loadRoutes(){
             <div><label>Max Vehicles</label><input id="rMax" type="number"></div>
             <div><label>Operating Hours</label><input id="rHours" placeholder="05:00 - 22:00"></div>
             <div><label>Status</label><select id="rStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="disputed">Disputed</option></select></div>
+            <div><label>Rank Allocation</label><input id="rRank" placeholder="e.g. Bay 3, Rank A"></div>
+            <div style="grid-column:1/-1;"><label>Dispute Notes</label><textarea id="rDispute" placeholder="Any route disputes or issues..." style="height:60px;resize:vertical;"></textarea></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addRoute()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
@@ -402,7 +415,7 @@ function showRouteForm(){const f=document.getElementById('routeForm');if(f)f.sty
 async function addRoute(){
     const from=document.getElementById('rFrom').value.trim(),to=document.getElementById('rTo').value.trim();
     if(!from||!to){alert('From and To required');return;}
-    const {error}=await window.sb.from('lota_routes').insert([{from_location:from,to_location:to,distance_km:parseInt(document.getElementById('rDistance').value)||null,fare:parseFloat(document.getElementById('rFare').value)||0,permit_number:document.getElementById('rPermit').value.trim(),max_vehicles:parseInt(document.getElementById('rMax').value)||null,operating_hours:document.getElementById('rHours').value.trim(),status:document.getElementById('rStatus').value}]);
+    const {error}=await window.sb.from('lota_routes').insert([{from_location:from,to_location:to,distance_km:parseInt(document.getElementById('rDistance').value)||null,fare:parseFloat(document.getElementById('rFare').value)||0,permit_number:document.getElementById('rPermit').value.trim(),max_vehicles:parseInt(document.getElementById('rMax').value)||null,operating_hours:document.getElementById('rHours').value.trim(),status:document.getElementById('rStatus').value,rank_allocation:document.getElementById('rRank').value.trim(),dispute_notes:document.getElementById('rDispute').value.trim()}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('routeForm').style.display='none';await loadRoutes();
 }
@@ -422,6 +435,7 @@ async function loadQueue(){
             <div><label>Vehicle</label><select id="qVehicle"><option value="">Select vehicle...</option>${allVehicles.map(v=>`<option value="${v.id}" data-plate="${v.plate_number}">${v.plate_number}</option>`).join('')}</select></div>
             <div><label>Route</label><select id="qRoute"><option value="">Select route...</option>${allRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} → ${r.to_location}</option>`).join('')}</select></div>
             <div><label>Driver</label><select id="qDriver"><option value="">Select driver...</option>${allDrivers.map(d=>`<option value="${d.id}">${d.full_name}</option>`).join('')}</select></div>
+            <div><label>Marshal Name</label><input id="qMarshal" placeholder="On-duty marshal"></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addToQueue()" class="btn-primary"><i class="fas fa-plus"></i> Join Queue</button>
@@ -434,7 +448,7 @@ async function loadQueue(){
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
                 <div style="display:flex;align-items:center;gap:0.75rem;">
                     ${isNext?'<span class="badge badge-blue">NEXT</span>':`<span style="color:#94a3b8;">#${i+1}</span>`}
-                    <div><p style="font-weight:700;">${q.plate_number}</p><p style="font-size:0.82rem;color:#64748b;">${q.route_label}${q.driver_name?' • '+q.driver_name:''}</p></div>
+                    <div><p style="font-weight:700;">${q.plate_number}</p><p style="font-size:0.82rem;color:#64748b;">${q.route_label}${q.driver_name?' • '+q.driver_name:''}${q.marshal_name?' • Marshal: '+q.marshal_name:''}</p></div>
                 </div>
                 <div style="text-align:right;"><p style="font-size:1.5rem;font-weight:900;color:#1a56db;">${q.seats_filled}/${q.capacity}</p><span class="badge badge-${q.status==='loading'?'yellow':q.status==='full'?'red':'green'}">${q.status.toUpperCase()}</span></div>
             </div>
@@ -451,7 +465,7 @@ async function addToQueue(){
     const vSel=document.getElementById('qVehicle'),rSel=document.getElementById('qRoute'),dSel=document.getElementById('qDriver');
     if(!vSel.value){alert('Select vehicle');return;}if(!rSel.value){alert('Select route');return;}
     const vehicle=allVehicles.find(v=>v.id===vSel.value);
-    const {error}=await window.sb.from('lota_queue').insert([{vehicle_id:vSel.value,plate_number:vSel.options[vSel.selectedIndex]?.dataset?.plate||'',route_id:rSel.value,route_label:rSel.options[rSel.selectedIndex]?.dataset?.label||'',driver_id:dSel.value||null,driver_name:dSel.value?dSel.options[dSel.selectedIndex]?.text:'',capacity:vehicle?.capacity||15,seats_filled:0,status:'waiting'}]);
+    const marshal=document.getElementById('qMarshal').value.trim();const {error}=await window.sb.from('lota_queue').insert([{vehicle_id:vSel.value,plate_number:vSel.options[vSel.selectedIndex]?.dataset?.plate||'',route_id:rSel.value,route_label:rSel.options[rSel.selectedIndex]?.dataset?.label||'',driver_id:dSel.value||null,driver_name:dSel.value?dSel.options[dSel.selectedIndex]?.text:'',capacity:vehicle?.capacity||15,seats_filled:0,status:'waiting',marshal_name:marshal}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('queueForm').style.display='none';await loadQueue();await loadDashboard();
 }
@@ -480,6 +494,8 @@ async function loadFinance(){
             <div><label>Description</label><input id="fDesc" placeholder="Description"></div>
             <div><label>Date</label><input id="fDate" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
             <div><label>Method</label><select id="fMethod"><option value="cash">Cash</option><option value="eft">EFT</option><option value="card">Card</option></select></div>
+            <div><label>Reference Number</label><input id="fRef" placeholder="Receipt/EFT ref"></div>
+            <div style="display:flex;align-items:center;gap:0.5rem;padding-top:1.5rem;"><input type="checkbox" id="fReconciled" style="width:auto;"><label style="margin:0;">Reconciled</label></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addTransaction()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
@@ -502,7 +518,7 @@ function showFinanceForm(){const f=document.getElementById('financeForm');if(f)f
 async function addTransaction(){
     const amount=parseFloat(document.getElementById('fAmount').value)||0;if(!amount){alert('Amount required');return;}
     const mSel=document.getElementById('fMember');
-    const {error}=await window.sb.from('lota_finance').insert([{type:document.getElementById('fType').value,member_id:mSel.value||null,member_name:mSel.value?mSel.options[mSel.selectedIndex]?.text:'',amount,description:document.getElementById('fDesc').value.trim(),payment_method:document.getElementById('fMethod').value,transaction_date:document.getElementById('fDate').value||null}]);
+    const {error}=await window.sb.from('lota_finance').insert([{type:document.getElementById('fType').value,member_id:mSel.value||null,member_name:mSel.value?mSel.options[mSel.selectedIndex]?.text:'',amount,description:document.getElementById('fDesc').value.trim(),payment_method:document.getElementById('fMethod').value,transaction_date:document.getElementById('fDate').value||null,reference_number:document.getElementById('fRef').value.trim(),reconciled:document.getElementById('fReconciled').checked}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('financeForm').style.display='none';await loadFinance();
 }
@@ -525,6 +541,8 @@ async function loadMeetings(){
             <div><label>Status</label><select id="gStatus"><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
             <div style="grid-column:1/-1;"><label>Minutes</label><textarea id="gMinutes" placeholder="Agenda and minutes..." style="height:80px;resize:vertical;"></textarea></div>
             <div style="grid-column:1/-1;"><label>Resolutions</label><textarea id="gResolutions" placeholder="Resolutions passed..." style="height:60px;resize:vertical;"></textarea></div>
+            <div style="grid-column:1/-1;"><label>Voting Items & Results</label><textarea id="gVoting" placeholder="Motion: ... For: ... Against: ... Result: ..." style="height:60px;resize:vertical;"></textarea></div>
+            <div style="grid-column:1/-1;"><label>Committee Members Present</label><input id="gCommittee" placeholder="Names of committee members present"></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addMeeting()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
@@ -538,7 +556,7 @@ async function loadMeetings(){
 }
 function showMeetingForm(){const f=document.getElementById('meetingForm');if(f)f.style.display='block';}
 async function addMeeting(){
-    const {error}=await window.sb.from('lota_meetings').insert([{meeting_type:document.getElementById('gType').value,meeting_date:document.getElementById('gDate').value||null,venue:document.getElementById('gVenue').value.trim(),chairperson:document.getElementById('gChair').value.trim(),attendees_count:parseInt(document.getElementById('gAttendees').value)||0,status:document.getElementById('gStatus').value,minutes:document.getElementById('gMinutes').value.trim(),resolutions:document.getElementById('gResolutions').value.trim()}]);
+    const {error}=await window.sb.from('lota_meetings').insert([{meeting_type:document.getElementById('gType').value,meeting_date:document.getElementById('gDate').value||null,venue:document.getElementById('gVenue').value.trim(),chairperson:document.getElementById('gChair').value.trim(),attendees_count:parseInt(document.getElementById('gAttendees').value)||0,status:document.getElementById('gStatus').value,minutes:document.getElementById('gMinutes').value.trim(),resolutions:document.getElementById('gResolutions').value.trim(),voting_items:document.getElementById('gVoting').value.trim(),committee_members:document.getElementById('gCommittee').value.trim()}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('meetingForm').style.display='none';await loadMeetings();
 }
@@ -564,6 +582,9 @@ async function loadIncidents(){
             <div><label>Status</label><select id="iStatus"><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></div>
             <div style="grid-column:1/-1;"><label>Description</label><textarea id="iDesc" placeholder="Describe the incident..." style="height:80px;resize:vertical;"></textarea></div>
             <div style="grid-column:1/-1;"><label>Action Taken</label><textarea id="iAction" placeholder="Actions taken..." style="height:60px;resize:vertical;"></textarea></div>
+            <div><label>Case Number</label><input id="iCase" placeholder="e.g. LOTA-2024-001"></div>
+            <div style="display:flex;align-items:center;gap:0.5rem;padding-top:1.5rem;"><input type="checkbox" id="iEscalated" style="width:auto;"><label style="margin:0;">Escalated</label></div>
+            <div style="grid-column:1/-1;"><label>Evidence / Documents</label><textarea id="iEvidence" placeholder="Evidence description, document references..." style="height:60px;resize:vertical;"></textarea></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addIncident()" class="btn-primary"><i class="fas fa-save"></i> Log</button>
@@ -580,7 +601,7 @@ function showIncidentForm(){const f=document.getElementById('incidentForm');if(f
 async function addIncident(){
     const desc=document.getElementById('iDesc').value.trim();if(!desc){alert('Description required');return;}
     const mSel=document.getElementById('iMember');
-    const {error}=await window.sb.from('lota_incidents').insert([{incident_type:document.getElementById('iType').value,member_id:mSel.value||null,member_name:mSel.value?mSel.options[mSel.selectedIndex]?.text:'',vehicle_id:document.getElementById('iVehicle').value||null,incident_date:document.getElementById('iDate').value||null,severity:document.getElementById('iSeverity').value,status:document.getElementById('iStatus').value,description:desc,action_taken:document.getElementById('iAction').value.trim()}]);
+    const {error}=await window.sb.from('lota_incidents').insert([{incident_type:document.getElementById('iType').value,member_id:mSel.value||null,member_name:mSel.value?mSel.options[mSel.selectedIndex]?.text:'',vehicle_id:document.getElementById('iVehicle').value||null,incident_date:document.getElementById('iDate').value||null,severity:document.getElementById('iSeverity').value,status:document.getElementById('iStatus').value,description:desc,action_taken:document.getElementById('iAction').value.trim(),case_number:document.getElementById('iCase').value.trim(),evidence_notes:document.getElementById('iEvidence').value.trim(),escalated:document.getElementById('iEscalated').checked}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('incidentForm').style.display='none';await loadIncidents();await loadDashboard();
 }
@@ -599,6 +620,8 @@ async function loadNotices(){
             <div><label>Priority</label><select id="cPriority"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
             <div style="grid-column:1/-1;"><label>Title</label><input id="cTitle" placeholder="Notice title"></div>
             <div style="grid-column:1/-1;"><label>Message</label><textarea id="cMessage" placeholder="Notice content..." style="height:80px;resize:vertical;"></textarea></div>
+            <div><label>Recipients Count</label><input id="cRecipients" type="number" placeholder="0"></div>
+            <div style="display:flex;align-items:center;gap:0.5rem;padding-top:1.5rem;"><input type="checkbox" id="cSMS" style="width:auto;"><label style="margin:0;">Mark as SMS Sent</label></div>
         </div>
         <div style="margin-top:1rem;display:flex;gap:0.75rem;">
             <button onclick="addNotice()" class="btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
@@ -611,7 +634,7 @@ function showCommForm(){const f=document.getElementById('commForm');if(f)f.style
 async function addNotice(){
     const title=document.getElementById('cTitle').value.trim(),msg=document.getElementById('cMessage').value.trim();
     if(!title||!msg){alert('Title and message required');return;}
-    const {error}=await window.sb.from('lota_communications').insert([{notice_type:document.getElementById('cType').value,priority:document.getElementById('cPriority').value,title,message:msg,sent_by:currentUser?.full_name||currentUser?.username}]);
+    const {error}=await window.sb.from('lota_communications').insert([{notice_type:document.getElementById('cType').value,priority:document.getElementById('cPriority').value,title,message:msg,sent_by:currentUser?.full_name||currentUser?.username,sms_sent:document.getElementById('cSMS').checked,recipient_count:parseInt(document.getElementById('cRecipients').value)||0}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('commForm').style.display='none';await loadNotices();
 }
