@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="monitoring-config.js"></script>
+<script src="sentry-monitoring.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L.O.T.A - Local Operations Taxi Association</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-init.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #f0f4f8; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1a202c; }
+        .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .btn-primary { background: #1a56db; border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.65rem 1.25rem; font-size: 0.9rem; transition: background 0.2s; }
+        .btn-primary:hover { background: #1e429f; }
+        .btn-secondary { background: #f8fafc; border: 1px solid #e2e8f0; color: #374151; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.65rem 1.25rem; font-size: 0.9rem; }
+        .btn-danger { background: #dc2626; border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; }
+        .btn-success { background: #059669; border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; }
+        input, select, textarea { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a202c; padding: 0.65rem 0.85rem; width: 100%; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: #1a56db; background: #fff; }
+        input::placeholder, textarea::placeholder { color: #a0aec0; }
+        label { color: #4a5568; font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .sidebar-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: #374151; transition: all 0.15s; }
+        .sidebar-item:hover { background: #f1f5f9; color: #1a56db; }
+        .sidebar-item.active { background: #eff6ff; color: #1a56db; font-weight: 700; }
+        .sidebar-item i { width: 18px; text-align: center; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-gray { background: #f1f5f9; color: #475569; }
+        .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; }
+        .table-row { display: grid; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; align-items: center; font-size: 0.875rem; }
+        .table-row:hover { background: #f8fafc; }
+        .table-head { background: #f8fafc; border-bottom: 2px solid #e2e8f0; font-weight: 700; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        .section-header { font-size: 1rem; font-weight: 700; color: #1a202c; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .divider { border: none; border-top: 1px solid #e2e8f0; margin: 0.75rem 0; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginScreen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1e3a5f 0%,#1a56db 100%);padding:1rem;">
+    <div style="background:white;border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="text-align:center;margin-bottom:2rem;">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,#1a56db,#1e3a5f);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                <i class="fas fa-taxi" style="font-size:1.8rem;color:white;"></i>
+            </div>
+            <h1 style="font-size:1.6rem;font-weight:900;color:#1a202c;letter-spacing:-0.5px;">L.O.T.A</h1>
+            <p style="color:#64748b;font-size:0.875rem;margin-top:0.25rem;">Local Operations Taxi Association</p>
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label>Username</label>
+            <input type="text" id="loginUsername" placeholder="Enter username">
+        </div>
+        <div style="margin-bottom:1.5rem;">
+            <label>PIN</label>
+            <input type="password" id="loginPin" placeholder="Enter PIN" onkeydown="if(event.key==='Enter')lotaLogin()">
+        </div>
+        <button onclick="lotaLogin()" class="btn-primary" style="width:100%;padding:0.85rem;font-size:1rem;">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+        <p style="text-align:center;color:#94a3b8;font-size:0.75rem;margin-top:1.5rem;">L.O.T.A Management System v1.0</p>
+    </div>
+</div>
+
+<!-- App shell placeholder -->
+
+<!-- Main App -->
+<div id="mainApp" style="display:none;min-height:100vh;">
+    <nav style="background:white;border-bottom:1px solid #e2e8f0;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#1a56db,#1e3a5f);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-taxi" style="color:white;font-size:1rem;"></i>
+            </div>
+            <span style="font-weight:800;color:#1a202c;">L.O.T.A</span>
+            <span style="color:#94a3b8;font-size:0.75rem;">Management System</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <div id="lotaClock" style="color:#64748b;font-size:0.85rem;font-weight:500;"></div>
+            <span id="navUsername" style="color:#374151;font-size:0.875rem;font-weight:600;"></span>
+            <button onclick="lotaLogout()" style="background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;padding:0.4rem 0.85rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+    <div style="display:flex;min-height:calc(100vh - 60px);">
+        <aside style="width:220px;background:white;border-right:1px solid #e2e8f0;padding:1rem;flex-shrink:0;overflow-y:auto;">
+            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Main</p>
+            <div class="sidebar-item active" onclick="showModule('dashboard',this)"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+            <hr class="divider">
+            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Operations</p>
+            <div class="sidebar-item" onclick="showModule('queue',this)"><i class="fas fa-list-ol"></i> Rank & Queue</div>
+            <div class="sidebar-item" onclick="showModule('routes',this)"><i class="fas fa-route"></i> Routes</div>
+            <hr class="divider">
+            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Administration</p>
+            <div class="sidebar-item" onclick="showModule('members',this)"><i class="fas fa-id-card"></i> Members</div>
+            <div class="sidebar-item" onclick="showModule('vehicles',this)"><i class="fas fa-bus"></i> Vehicles</div>
+            <div class="sidebar-item" onclick="showModule('drivers',this)"><i class="fas fa-user-tie"></i> Drivers</div>
+            <hr class="divider">
+            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Finance & Governance</p>
+            <div class="sidebar-item" onclick="showModule('finance',this)"><i class="fas fa-money-bill-wave"></i> Finance</div>
+            <div class="sidebar-item" onclick="showModule('governance',this)"><i class="fas fa-landmark"></i> Governance</div>
+            <hr class="divider">
+            <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Compliance</p>
+            <div class="sidebar-item" onclick="showModule('incidents',this)"><i class="fas fa-exclamation-triangle"></i> Incidents</div>
+            <div class="sidebar-item" onclick="showModule('communications',this)"><i class="fas fa-bullhorn"></i> Communications</div>
+            <div class="sidebar-item" onclick="showModule('analytics',this)"><i class="fas fa-chart-bar"></i> Analytics</div>
+        </aside>
+        <main style="flex:1;padding:1.5rem;overflow-y:auto;background:#f0f4f8;">
+            <div id="mod-dashboard"><div class="card p-6"><p style="color:#64748b;">Loading dashboard...</p></div></div>
+            <div id="mod-queue" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading queue...</p></div></div>
+            <div id="mod-routes" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading routes...</p></div></div>
+            <div id="mod-members" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading members...</p></div></div>
+            <div id="mod-vehicles" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading vehicles...</p></div></div>
+            <div id="mod-drivers" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading drivers...</p></div></div>
+            <div id="mod-finance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading finance...</p></div></div>
+            <div id="mod-governance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading governance...</p></div></div>
+            <div id="mod-incidents" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading incidents...</p></div></div>
+            <div id="mod-communications" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading communications...</p></div></div>
+            <div id="mod-analytics" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading analytics...</p></div></div>
+        </main>
+    </div>
+</div>
+
+
+<script>
+let currentUser = null;
+let allMembers = [], allVehicles = [], allDrivers = [], allRoutes = [], allQueue = [];
+
+setInterval(() => { const el = document.getElementById('lotaClock'); if(el) el.textContent = new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }, 1000);
+
+async function lotaLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const pin = document.getElementById('loginPin').value.trim();
+    if (!username||!pin) { alert('Enter username and PIN'); return; }
+    if (!window.sb) { alert('App still loading'); return; }
+    const { data, error } = await window.sb.from('lota_users').select('*').eq('username',username).eq('pin',pin).eq('is_active',true).single();
+    if (error||!data) { alert('Invalid credentials'); return; }
+    currentUser = data;
+    sessionStorage.setItem('lota_user', JSON.stringify(data));
+    initApp();
+}
+
+function lotaLogout() { sessionStorage.removeItem('lota_user'); location.reload(); }
+
+async function initApp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('navUsername').textContent = currentUser.full_name||currentUser.username;
+    await Promise.all([loadMembers(), loadVehicles(), loadDrivers(), loadRoutes()]);
+    await loadDashboard();
+    setInterval(() => { loadQueue(); loadDashboard(); }, 30000);
+}
+
+function showModule(mod, el) {
+    document.querySelectorAll('[id^="mod-"]').forEach(m => m.style.display='none');
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    document.getElementById('mod-'+mod).style.display = 'block';
+    if (el) el.classList.add('active');
+    if (mod==='queue') loadQueue();
+    if (mod==='finance') loadFinance();
+    if (mod==='analytics') loadAnalytics();
+    if (mod==='incidents') loadIncidents();
+    if (mod==='governance') loadMeetings();
+    if (mod==='communications') loadNotices();
+}
+
+async function loadDashboard() {
+    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+    const [mRes,vRes,dRes,qRes,iRes,fRes] = await Promise.all([
+        window.sb.from('lota_members').select('id').eq('status','active'),
+        window.sb.from('lota_vehicles').select('id').eq('status','active'),
+        window.sb.from('lota_drivers').select('id').eq('status','active'),
+        window.sb.from('lota_queue').select('*').in('status',['waiting','loading']),
+        window.sb.from('lota_incidents').select('id').eq('status','open'),
+        window.sb.from('lota_finance').select('amount,type').gte('created_at',monthStart.toISOString()).in('type',['membership_fee','income','collection'])
+    ]);
+    const fees = (fRes.data||[]).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const queue = qRes.data||[];
+    document.getElementById('mod-dashboard').innerHTML = `
+    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;color:#1a202c;">Dashboard</h2><p style="color:#64748b;font-size:0.875rem;">L.O.T.A operations overview</p></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Members</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${(mRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Vehicles</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${(vRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">In Queue</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${queue.length}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Drivers</p><p style="font-size:2rem;font-weight:900;color:#1a56db;">${(dRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Open Incidents</p><p style="font-size:2rem;font-weight:900;color:#dc2626;">${(iRes.data||[]).length}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Fees This Month</p><p style="font-size:2rem;font-weight:900;color:#059669;">R${fees.toFixed(2)}</p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="card p-5"><div class="section-header"><i class="fas fa-list-ol" style="color:#1a56db;"></i> Live Queue</div>
+        ${queue.length===0?'<p style="color:#94a3b8;font-size:0.875rem;">No taxis in queue</p>':queue.slice(0,5).map((q,i)=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.85rem;font-weight:600;">#${i+1} ${q.plate_number}</span><span style="font-size:0.8rem;color:#64748b;">${q.route_label}</span><span class="badge badge-${q.status==='loading'?'yellow':'green'}">${q.status}</span></div>`).join('')}
+        </div>
+        <div class="card p-5"><div class="section-header"><i class="fas fa-exclamation-circle" style="color:#dc2626;"></i> Quick Actions</div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <button onclick="showModule('queue',document.querySelector('[onclick*=queue]')); showQueueForm()" class="btn-primary" style="text-align:left;"><i class="fas fa-plus"></i> Add Taxi to Queue</button>
+                <button onclick="showModule('members',document.querySelector('[onclick*=members]')); showMemberForm()" class="btn-secondary" style="text-align:left;"><i class="fas fa-user-plus"></i> Add Member</button>
+                <button onclick="showModule('incidents',document.querySelector('[onclick*=incidents]')); showIncidentForm()" class="btn-danger" style="text-align:left;"><i class="fas fa-exclamation-triangle"></i> Log Incident</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+async function loadMembers() {
+    const { data } = await window.sb.from('lota_members').select('*').order('full_name');
+    allMembers = data||[];
+    ['fMember','iMember'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML='<option value="">Select member...</option>'+allMembers.map(m=>`<option value="${m.id}">${m.full_name}</option>`).join(''); });
+    const vOwner=document.getElementById('vOwner'); if(vOwner) vOwner.innerHTML='<option value="">Select owner...</option>'+allMembers.filter(m=>m.member_type==='owner').map(m=>`<option value="${m.id}">${m.full_name}</option>`).join('');
+    renderModuleMembers();
+}
+
+function renderModuleMembers() {
+    document.getElementById('mod-members').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Membership Administration</h2><p style="color:#64748b;font-size:0.875rem;">Members, fees and status</p></div>
+        <button onclick="showMemberForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Member</button>
+    </div>
+    <div id="memberForm" class="card p-6 mb-6" style="display:none;">
+        <div class="section-header"><i class="fas fa-user-plus" style="color:#1a56db;"></i> New Member</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Full Name</label><input id="mName" placeholder="Full name"></div>
+            <div><label>ID Number</label><input id="mId" placeholder="SA ID number"></div>
+            <div><label>Phone</label><input id="mPhone" placeholder="Contact number"></div>
+            <div><label>Email</label><input id="mEmail" placeholder="Email address"></div>
+            <div><label>Member Type</label><select id="mType"><option value="owner">Owner</option><option value="driver">Driver</option><option value="committee">Committee</option></select></div>
+            <div><label>Membership Fee (R)</label><input id="mFee" type="number" placeholder="0.00"></div>
+            <div><label>Permit Number</label><input id="mPermit" placeholder="Operating permit"></div>
+            <div><label>Join Date</label><input id="mJoinDate" type="date"></div>
+            <div><label>Status</label><select id="mStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="pending">Pending</option></select></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addMember()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('memberForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card p-4 mb-6"><div style="display:flex;gap:1rem;">
+        <input id="memberSearch" placeholder="Search name, ID, phone..." onkeyup="filterMembers()" style="max-width:300px;">
+        <select id="memberStatusFilter" onchange="filterMembers()" style="width:auto;"><option value="all">All Status</option><option value="active">Active</option><option value="suspended">Suspended</option><option value="pending">Pending</option></select>
+        <select id="memberTypeFilter" onchange="filterMembers()" style="width:auto;"><option value="all">All Types</option><option value="owner">Owners</option><option value="driver">Drivers</option><option value="committee">Committee</option></select>
+    </div></div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Member</span><span>Type</span><span>Permit</span><span>Fee</span><span>Status</span><span></span></div>
+        <div id="membersList">${allMembers.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No members yet</div>':allMembers.map(m=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${m.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${m.phone||''}</p></div><span class="badge badge-blue">${m.member_type||''}</span><span style="font-size:0.85rem;">${m.permit_number||'—'}</span><span style="color:#059669;font-weight:600;">R${parseFloat(m.membership_fee||0).toFixed(2)}</span><span class="badge badge-${m.status==='active'?'green':m.status==='suspended'?'red':'yellow'}">${m.status}</span><button onclick="deleteMember('${m.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
+    </div>`;
+}
+
+function showMemberForm() { const f=document.getElementById('memberForm'); if(f) f.style.display='block'; }
+function filterMembers() {
+    const q=(document.getElementById('memberSearch')?.value||'').toLowerCase();
+    const s=document.getElementById('memberStatusFilter')?.value||'all';
+    const t=document.getElementById('memberTypeFilter')?.value||'all';
+    const list=allMembers.filter(m=>(s==='all'||m.status===s)&&(t==='all'||m.member_type===t)&&((m.full_name||'').toLowerCase().includes(q)||(m.phone||'').includes(q)));
+    const el=document.getElementById('membersList'); if(el) el.innerHTML=list.map(m=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${m.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${m.phone||''}</p></div><span class="badge badge-blue">${m.member_type||''}</span><span style="font-size:0.85rem;">${m.permit_number||'—'}</span><span style="color:#059669;font-weight:600;">R${parseFloat(m.membership_fee||0).toFixed(2)}</span><span class="badge badge-${m.status==='active'?'green':m.status==='suspended'?'red':'yellow'}">${m.status}</span><button onclick="deleteMember('${m.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('');
+}
+async function addMember() {
+    const name=document.getElementById('mName').value.trim(); if(!name){alert('Name required');return;}
+    const {error}=await window.sb.from('lota_members').insert([{full_name:name,id_number:document.getElementById('mId').value.trim(),phone:document.getElementById('mPhone').value.trim(),email:document.getElementById('mEmail').value.trim(),member_type:document.getElementById('mType').value,membership_fee:parseFloat(document.getElementById('mFee').value)||0,permit_number:document.getElementById('mPermit').value.trim(),join_date:document.getElementById('mJoinDate').value||null,status:document.getElementById('mStatus').value}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('memberForm').style.display='none';
+    await loadMembers();
+}
+async function deleteMember(id) { if(!confirm('Remove member?'))return; await window.sb.from('lota_members').delete().eq('id',id); await loadMembers(); }
+
+async function loadVehicles() {
+    const {data}=await window.sb.from('lota_vehicles').select('*').order('plate_number');
+    allVehicles=data||[];
+    ['dVehicle','iVehicle','qVehicle'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML='<option value="">Select vehicle...</option>'+allVehicles.map(v=>`<option value="${v.id}" data-plate="${v.plate_number}">${v.plate_number} ${v.make_model?'— '+v.make_model:''}</option>`).join(''); });
+    renderModuleVehicles();
+}
+function renderModuleVehicles() {
+    const now=new Date();
+    document.getElementById('mod-vehicles').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Vehicle Administration</h2><p style="color:#64748b;font-size:0.875rem;">Fleet, licensing and compliance</p></div>
+        <button onclick="showVehicleForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Vehicle</button>
+    </div>
+    <div id="vehicleForm" class="card p-6 mb-6" style="display:none;">
+        <div class="section-header"><i class="fas fa-bus" style="color:#1a56db;"></i> Register Vehicle</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Plate</label><input id="vPlate" placeholder="CA 123-456" style="text-transform:uppercase;"></div>
+            <div><label>Make & Model</label><input id="vModel" placeholder="Toyota Quantum"></div>
+            <div><label>Year</label><input id="vYear" type="number" placeholder="2020"></div>
+            <div><label>Owner</label><select id="vOwner"><option value="">Select owner...</option>${allMembers.filter(m=>m.member_type==='owner').map(m=>`<option value="${m.id}">${m.full_name}</option>`).join('')}</select></div>
+            <div><label>Route</label><select id="vRoute"><option value="">Select route...</option>${allRoutes.map(r=>`<option value="${r.id}">${r.from_location} → ${r.to_location}</option>`).join('')}</select></div>
+            <div><label>Capacity</label><input id="vCapacity" type="number" value="15"></div>
+            <div><label>Licence Expiry</label><input id="vLicence" type="date"></div>
+            <div><label>Insurance Expiry</label><input id="vInsurance" type="date"></div>
+            <div><label>Next Inspection</label><input id="vInspection" type="date"></div>
+            <div><label>Permit</label><input id="vPermit" placeholder="Permit number"></div>
+            <div><label>Status</label><select id="vStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="unroadworthy">Unroadworthy</option></select></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addVehicle()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('vehicleForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:1.5fr 1.5fr 1fr 1fr 1fr 1fr 80px;"><span>Vehicle</span><span>Owner</span><span>Route</span><span>Licence</span><span>Insurance</span><span>Status</span><span></span></div>
+        <div id="vehiclesList">${allVehicles.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No vehicles yet</div>':allVehicles.map(v=>{
+            const licExp=v.licence_expiry?new Date(v.licence_expiry):null;
+            const insExp=v.insurance_expiry?new Date(v.insurance_expiry):null;
+            const warn30=new Date(now.getTime()+30*24*60*60*1000);
+            return `<div class="table-row" style="grid-template-columns:1.5fr 1.5fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${v.plate_number}</p><p style="font-size:0.78rem;color:#64748b;">${v.make_model||''}</p></div><span style="font-size:0.85rem;">${v.owner_name||'—'}</span><span style="font-size:0.85rem;">${v.route_label||'—'}</span><span style="font-size:0.8rem;color:${licExp&&licExp<warn30?'#dc2626':'#374151'};">${licExp?licExp.toLocaleDateString('en-ZA'):'—'}</span><span style="font-size:0.8rem;color:${insExp&&insExp<warn30?'#dc2626':'#374151'};">${insExp?insExp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${v.status==='active'?'green':v.status==='suspended'?'red':'yellow'}">${v.status}</span><button onclick="deleteVehicle('${v.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`;
+        }).join('')}</div>
+    </div>`;
+}
+function showVehicleForm(){const f=document.getElementById('vehicleForm');if(f)f.style.display='block';}
+async function addVehicle(){
+    const plate=document.getElementById('vPlate').value.trim().toUpperCase();if(!plate){alert('Plate required');return;}
+    const ownerSel=document.getElementById('vOwner');const routeSel=document.getElementById('vRoute');
+    const {error}=await window.sb.from('lota_vehicles').insert([{plate_number:plate,make_model:document.getElementById('vModel').value.trim(),year:parseInt(document.getElementById('vYear').value)||null,owner_id:ownerSel.value||null,owner_name:ownerSel.options[ownerSel.selectedIndex]?.text||'',route_id:routeSel.value||null,route_label:routeSel.options[routeSel.selectedIndex]?.text||'',capacity:parseInt(document.getElementById('vCapacity').value)||15,licence_expiry:document.getElementById('vLicence').value||null,insurance_expiry:document.getElementById('vInsurance').value||null,next_inspection:document.getElementById('vInspection').value||null,permit_number:document.getElementById('vPermit').value.trim(),status:document.getElementById('vStatus').value}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('vehicleForm').style.display='none';await loadVehicles();
+}
+async function deleteVehicle(id){if(!confirm('Remove vehicle?'))return;await window.sb.from('lota_vehicles').delete().eq('id',id);await loadVehicles();}
+
+async function loadDrivers(){
+    const {data}=await window.sb.from('lota_drivers').select('*').order('full_name');
+    allDrivers=data||[];
+    const qDriver=document.getElementById('qDriver');if(qDriver)qDriver.innerHTML='<option value="">Select driver...</option>'+allDrivers.map(d=>`<option value="${d.id}">${d.full_name}</option>`).join('');
+    renderModuleDrivers();
+}
+function renderModuleDrivers(){
+    const now=new Date();
+    document.getElementById('mod-drivers').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Driver Administration</h2><p style="color:#64748b;font-size:0.875rem;">Profiles, permits and conduct</p></div>
+        <button onclick="showDriverForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Driver</button>
+    </div>
+    <div id="driverForm" class="card p-6 mb-6" style="display:none;">
+        <div class="section-header"><i class="fas fa-user-tie" style="color:#1a56db;"></i> Add Driver</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Full Name</label><input id="dName" placeholder="Full name"></div>
+            <div><label>ID Number</label><input id="dId" placeholder="SA ID number"></div>
+            <div><label>Phone</label><input id="dPhone" placeholder="Contact number"></div>
+            <div><label>Role</label><select id="dRole"><option value="driver">Driver</option><option value="assistant">Assistant</option></select></div>
+            <div><label>Vehicle</label><select id="dVehicle"><option value="">Select vehicle...</option>${allVehicles.map(v=>`<option value="${v.id}" data-plate="${v.plate_number}">${v.plate_number}</option>`).join('')}</select></div>
+            <div><label>PDP Number</label><input id="dPdp" placeholder="PDP permit"></div>
+            <div><label>PDP Expiry</label><input id="dPdpExpiry" type="date"></div>
+            <div><label>Licence Code</label><input id="dLicence" placeholder="e.g. C1"></div>
+            <div><label>Status</label><select id="dStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="inactive">Inactive</option></select></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addDriver()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('driverForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Driver</span><span>Role</span><span>Vehicle</span><span>PDP Expiry</span><span>Status</span><span></span></div>
+        <div>${allDrivers.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No drivers yet</div>':allDrivers.map(d=>{const pdpExp=d.pdp_expiry?new Date(d.pdp_expiry):null;const warn=pdpExp&&pdpExp<new Date(now.getTime()+30*24*60*60*1000);return `<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${d.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${d.phone||''}</p></div><span class="badge badge-blue">${d.role||'driver'}</span><span style="font-size:0.85rem;">${d.vehicle_plate||'—'}</span><span style="font-size:0.8rem;color:${warn?'#dc2626':'#374151'};">${pdpExp?pdpExp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${d.status==='active'?'green':d.status==='suspended'?'red':'yellow'}">${d.status}</span><button onclick="deleteDriver('${d.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`;}).join('')}</div>
+    </div>`;
+}
+function showDriverForm(){const f=document.getElementById('driverForm');if(f)f.style.display='block';}
+async function addDriver(){
+    const name=document.getElementById('dName').value.trim();if(!name){alert('Name required');return;}
+    const vSel=document.getElementById('dVehicle');
+    const {error}=await window.sb.from('lota_drivers').insert([{full_name:name,id_number:document.getElementById('dId').value.trim(),phone:document.getElementById('dPhone').value.trim(),role:document.getElementById('dRole').value,vehicle_id:vSel.value||null,vehicle_plate:vSel.options[vSel.selectedIndex]?.dataset?.plate||'',pdp_number:document.getElementById('dPdp').value.trim(),pdp_expiry:document.getElementById('dPdpExpiry').value||null,licence_code:document.getElementById('dLicence').value.trim(),status:document.getElementById('dStatus').value}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('driverForm').style.display='none';await loadDrivers();
+}
+async function deleteDriver(id){if(!confirm('Remove driver?'))return;await window.sb.from('lota_drivers').delete().eq('id',id);await loadDrivers();}
+
+async function loadRoutes(){
+    const {data}=await window.sb.from('lota_routes').select('*').order('from_location');
+    allRoutes=data||[];
+    ['vRoute','qRoute'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<option value="">Select route...</option>'+allRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} → ${r.to_location}</option>`).join('');});
+    document.getElementById('mod-routes').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Route Administration</h2><p style="color:#64748b;font-size:0.875rem;">Permissions, schedules and allocations</p></div>
+        <button onclick="showRouteForm()" class="btn-primary"><i class="fas fa-plus"></i> Add Route</button>
+    </div>
+    <div id="routeForm" class="card p-6 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>From</label><input id="rFrom" placeholder="Origin"></div>
+            <div><label>To</label><input id="rTo" placeholder="Destination"></div>
+            <div><label>Distance (km)</label><input id="rDistance" type="number"></div>
+            <div><label>Fare (R)</label><input id="rFare" type="number"></div>
+            <div><label>Permit</label><input id="rPermit" placeholder="Route permit"></div>
+            <div><label>Max Vehicles</label><input id="rMax" type="number"></div>
+            <div><label>Operating Hours</label><input id="rHours" placeholder="05:00 - 22:00"></div>
+            <div><label>Status</label><select id="rStatus"><option value="active">Active</option><option value="suspended">Suspended</option><option value="disputed">Disputed</option></select></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addRoute()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('routeForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Route</span><span>Fare</span><span>Permit</span><span>Hours</span><span>Status</span><span></span></div>
+        <div>${allRoutes.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No routes yet</div>':allRoutes.map(r=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${r.from_location} → ${r.to_location}</p><p style="font-size:0.78rem;color:#64748b;">${r.distance_km?r.distance_km+'km':''}</p></div><span style="color:#059669;font-weight:700;">R${parseFloat(r.fare||0).toFixed(2)}</span><span style="font-size:0.85rem;">${r.permit_number||'—'}</span><span style="font-size:0.85rem;">${r.operating_hours||'—'}</span><span class="badge badge-${r.status==='active'?'green':r.status==='disputed'?'yellow':'red'}">${r.status}</span><button onclick="deleteRoute('${r.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
+    </div>`;
+}
+function showRouteForm(){const f=document.getElementById('routeForm');if(f)f.style.display='block';}
+async function addRoute(){
+    const from=document.getElementById('rFrom').value.trim(),to=document.getElementById('rTo').value.trim();
+    if(!from||!to){alert('From and To required');return;}
+    const {error}=await window.sb.from('lota_routes').insert([{from_location:from,to_location:to,distance_km:parseInt(document.getElementById('rDistance').value)||null,fare:parseFloat(document.getElementById('rFare').value)||0,permit_number:document.getElementById('rPermit').value.trim(),max_vehicles:parseInt(document.getElementById('rMax').value)||null,operating_hours:document.getElementById('rHours').value.trim(),status:document.getElementById('rStatus').value}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('routeForm').style.display='none';await loadRoutes();
+}
+async function deleteRoute(id){if(!confirm('Remove route?'))return;await window.sb.from('lota_routes').delete().eq('id',id);await loadRoutes();}
+
+async function loadQueue(){
+    const {data}=await window.sb.from('lota_queue').select('*').not('status','eq','departed').order('created_at');
+    allQueue=data||[];
+    const sorted=[...allQueue].sort((a,b)=>({'waiting':0,'loading':1,'full':2}[a.status]||0)-({'waiting':0,'loading':1,'full':2}[b.status]||0));
+    document.getElementById('mod-queue').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Rank & Queue Operations</h2><p style="color:#64748b;font-size:0.875rem;">Live queue and departures</p></div>
+        <button onclick="showQueueForm()" class="btn-primary"><i class="fas fa-plus"></i> Add to Queue</button>
+    </div>
+    <div id="queueForm" class="card p-6 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Vehicle</label><select id="qVehicle"><option value="">Select vehicle...</option>${allVehicles.map(v=>`<option value="${v.id}" data-plate="${v.plate_number}">${v.plate_number}</option>`).join('')}</select></div>
+            <div><label>Route</label><select id="qRoute"><option value="">Select route...</option>${allRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} → ${r.to_location}</option>`).join('')}</select></div>
+            <div><label>Driver</label><select id="qDriver"><option value="">Select driver...</option>${allDrivers.map(d=>`<option value="${d.id}">${d.full_name}</option>`).join('')}</select></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addToQueue()" class="btn-primary"><i class="fas fa-plus"></i> Join Queue</button>
+            <button onclick="document.getElementById('queueForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    ${sorted.length===0?'<div class="card p-8" style="text-align:center;color:#94a3b8;"><i class="fas fa-bus" style="font-size:2rem;display:block;margin-bottom:1rem;"></i>No taxis in queue</div>':sorted.map((q,i)=>{
+        const pct=Math.round((q.seats_filled/q.capacity)*100);const isNext=i===0;
+        return `<div class="card" style="padding:1.25rem;margin-bottom:0.75rem;${isNext?'border-left:4px solid #1a56db;':''}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    ${isNext?'<span class="badge badge-blue">NEXT</span>':`<span style="color:#94a3b8;">#${i+1}</span>`}
+                    <div><p style="font-weight:700;">${q.plate_number}</p><p style="font-size:0.82rem;color:#64748b;">${q.route_label}${q.driver_name?' • '+q.driver_name:''}</p></div>
+                </div>
+                <div style="text-align:right;"><p style="font-size:1.5rem;font-weight:900;color:#1a56db;">${q.seats_filled}/${q.capacity}</p><span class="badge badge-${q.status==='loading'?'yellow':q.status==='full'?'red':'green'}">${q.status.toUpperCase()}</span></div>
+            </div>
+            <div style="background:#f1f5f9;border-radius:6px;height:8px;overflow:hidden;margin-bottom:0.75rem;"><div style="background:#1a56db;height:100%;width:${pct}%;border-radius:6px;transition:width 0.5s;"></div></div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                ${q.status!=='full'?`<button onclick="updateSeats('${q.id}',${q.seats_filled},${q.capacity},1)" class="btn-success" style="padding:0.35rem 0.75rem;font-size:0.8rem;"><i class="fas fa-plus"></i> Seat</button><button onclick="updateSeats('${q.id}',${q.seats_filled},${q.capacity},-1)" class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;"><i class="fas fa-minus"></i> Seat</button><button onclick="markDeparted('${q.id}')" style="background:#d97706;border:none;color:white;padding:0.35rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;"><i class="fas fa-road"></i> Departed</button>`:''}
+                <button onclick="removeFromQueue('${q.id}')" class="btn-danger" style="padding:0.35rem 0.75rem;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('')}`;
+}
+function showQueueForm(){const f=document.getElementById('queueForm');if(f)f.style.display='block';}
+async function addToQueue(){
+    const vSel=document.getElementById('qVehicle'),rSel=document.getElementById('qRoute'),dSel=document.getElementById('qDriver');
+    if(!vSel.value){alert('Select vehicle');return;}if(!rSel.value){alert('Select route');return;}
+    const vehicle=allVehicles.find(v=>v.id===vSel.value);
+    const {error}=await window.sb.from('lota_queue').insert([{vehicle_id:vSel.value,plate_number:vSel.options[vSel.selectedIndex]?.dataset?.plate||'',route_id:rSel.value,route_label:rSel.options[rSel.selectedIndex]?.dataset?.label||'',driver_id:dSel.value||null,driver_name:dSel.value?dSel.options[dSel.selectedIndex]?.text:'',capacity:vehicle?.capacity||15,seats_filled:0,status:'waiting'}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('queueForm').style.display='none';await loadQueue();await loadDashboard();
+}
+async function updateSeats(id,current,capacity,change){const n=Math.max(0,Math.min(capacity,current+change));const status=n>=capacity?'full':n>0?'loading':'waiting';await window.sb.from('lota_queue').update({seats_filled:n,status}).eq('id',id);await loadQueue();await loadDashboard();}
+async function markDeparted(id){if(!confirm('Mark departed?'))return;await window.sb.from('lota_queue').update({status:'departed',departed_at:new Date().toISOString()}).eq('id',id);await loadQueue();await loadDashboard();}
+async function removeFromQueue(id){if(!confirm('Remove?'))return;await window.sb.from('lota_queue').delete().eq('id',id);await loadQueue();await loadDashboard();}
+
+async function loadFinance(){
+    const filter=document.getElementById('finFilter')?.value||'month';
+    let start=new Date();if(filter==='month'){start.setDate(1);start.setHours(0,0,0,0);}else if(filter==='week'){start.setDate(start.getDate()-7);}else{start=new Date('2020-01-01');}
+    const {data}=await window.sb.from('lota_finance').select('*').gte('created_at',start.toISOString()).order('created_at',{ascending:false});
+    const txns=data||[];
+    const income=txns.filter(t=>['membership_fee','income','collection'].includes(t.type)).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const expenses=txns.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const fines=txns.filter(t=>t.type==='fine').reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    document.getElementById('mod-finance').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Financial Administration</h2><p style="color:#64748b;font-size:0.875rem;">Fees, fines and reconciliation</p></div>
+        <button onclick="showFinanceForm()" class="btn-primary"><i class="fas fa-plus"></i> Record Transaction</button>
+    </div>
+    <div id="financeForm" class="card p-6 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Type</label><select id="fType"><option value="membership_fee">Membership Fee</option><option value="fine">Fine</option><option value="collection">Collection</option><option value="expense">Expense</option><option value="income">Income</option></select></div>
+            <div><label>Member</label><select id="fMember"><option value="">Select member...</option>${allMembers.map(m=>`<option value="${m.id}">${m.full_name}</option>`).join('')}</select></div>
+            <div><label>Amount (R)</label><input id="fAmount" type="number" placeholder="0.00"></div>
+            <div><label>Description</label><input id="fDesc" placeholder="Description"></div>
+            <div><label>Date</label><input id="fDate" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+            <div><label>Method</label><select id="fMethod"><option value="cash">Cash</option><option value="eft">EFT</option><option value="card">Card</option></select></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addTransaction()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('financeForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Income</p><p style="font-size:1.5rem;font-weight:900;color:#059669;">R${income.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Expenses</p><p style="font-size:1.5rem;font-weight:900;color:#dc2626;">R${expenses.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Fines</p><p style="font-size:1.5rem;font-weight:900;color:#d97706;">R${fines.toFixed(2)}</p></div>
+        <div class="stat-card"><p style="color:#64748b;font-size:0.78rem;font-weight:600;text-transform:uppercase;">Net</p><p style="font-size:1.5rem;font-weight:900;color:#1a56db;">R${(income-expenses).toFixed(2)}</p></div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div style="padding:1rem;border-bottom:1px solid #e2e8f0;"><select id="finFilter" onchange="loadFinance()" style="width:auto;"><option value="month">This Month</option><option value="week">This Week</option><option value="all">All Time</option></select></div>
+        <div class="table-row table-head" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span>Date</span><span>Description</span><span>Member</span><span>Type</span><span>Amount</span><span>Method</span></div>
+        <div>${txns.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No transactions</div>':txns.map(t=>`<div class="table-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${new Date(t.created_at).toLocaleDateString('en-ZA')}</span><span style="font-size:0.85rem;font-weight:500;">${t.description||'—'}</span><span style="font-size:0.85rem;">${t.member_name||'—'}</span><span class="badge badge-${t.type==='expense'?'red':t.type==='fine'?'yellow':'green'}">${t.type.replace('_',' ')}</span><span style="font-weight:700;color:${t.type==='expense'?'#dc2626':'#059669'};">R${parseFloat(t.amount||0).toFixed(2)}</span><span style="font-size:0.8rem;color:#64748b;">${t.payment_method||''}</span></div>`).join('')}</div>
+    </div>`;
+}
+function showFinanceForm(){const f=document.getElementById('financeForm');if(f)f.style.display='block';}
+async function addTransaction(){
+    const amount=parseFloat(document.getElementById('fAmount').value)||0;if(!amount){alert('Amount required');return;}
+    const mSel=document.getElementById('fMember');
+    const {error}=await window.sb.from('lota_finance').insert([{type:document.getElementById('fType').value,member_id:mSel.value||null,member_name:mSel.value?mSel.options[mSel.selectedIndex]?.text:'',amount,description:document.getElementById('fDesc').value.trim(),payment_method:document.getElementById('fMethod').value,transaction_date:document.getElementById('fDate').value||null}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('financeForm').style.display='none';await loadFinance();
+}
+
+async function loadMeetings(){
+    const {data}=await window.sb.from('lota_meetings').select('*').order('meeting_date',{ascending:false});
+    const meetings=data||[];
+    document.getElementById('mod-governance').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Governance & Meetings</h2><p style="color:#64748b;font-size:0.875rem;">Notices, minutes and resolutions</p></div>
+        <button onclick="showMeetingForm()" class="btn-primary"><i class="fas fa-plus"></i> New Meeting</button>
+    </div>
+    <div id="meetingForm" class="card p-6 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Type</label><select id="gType"><option value="agm">AGM</option><option value="special">Special</option><option value="committee">Committee</option><option value="emergency">Emergency</option></select></div>
+            <div><label>Date</label><input id="gDate" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+            <div><label>Venue</label><input id="gVenue" placeholder="Meeting venue"></div>
+            <div><label>Chairperson</label><input id="gChair" placeholder="Chairperson name"></div>
+            <div><label>Attendees</label><input id="gAttendees" type="number" placeholder="0"></div>
+            <div><label>Status</label><select id="gStatus"><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+            <div style="grid-column:1/-1;"><label>Minutes</label><textarea id="gMinutes" placeholder="Agenda and minutes..." style="height:80px;resize:vertical;"></textarea></div>
+            <div style="grid-column:1/-1;"><label>Resolutions</label><textarea id="gResolutions" placeholder="Resolutions passed..." style="height:60px;resize:vertical;"></textarea></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addMeeting()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('meetingForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 80px;"><span>Date</span><span>Type</span><span>Venue</span><span>Chair</span><span>Status</span><span></span></div>
+        <div>${meetings.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No meetings recorded</div>':meetings.map(m=>`<div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${m.meeting_date?new Date(m.meeting_date).toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-blue">${m.meeting_type}</span><span style="font-size:0.85rem;">${m.venue||'—'}</span><span style="font-size:0.85rem;">${m.chairperson||'—'}</span><span class="badge badge-${m.status==='completed'?'green':m.status==='cancelled'?'red':'yellow'}">${m.status}</span><button onclick="viewMeeting('${m.id}')" class="btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-eye"></i></button></div>`).join('')}</div>
+    </div>`;
+}
+function showMeetingForm(){const f=document.getElementById('meetingForm');if(f)f.style.display='block';}
+async function addMeeting(){
+    const {error}=await window.sb.from('lota_meetings').insert([{meeting_type:document.getElementById('gType').value,meeting_date:document.getElementById('gDate').value||null,venue:document.getElementById('gVenue').value.trim(),chairperson:document.getElementById('gChair').value.trim(),attendees_count:parseInt(document.getElementById('gAttendees').value)||0,status:document.getElementById('gStatus').value,minutes:document.getElementById('gMinutes').value.trim(),resolutions:document.getElementById('gResolutions').value.trim()}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('meetingForm').style.display='none';await loadMeetings();
+}
+async function viewMeeting(id){const {data}=await window.sb.from('lota_meetings').select('*').eq('id',id).single();if(!data)return;alert(`${data.meeting_type.toUpperCase()} — ${data.meeting_date}\nVenue: ${data.venue}\nChair: ${data.chairperson}\nAttendees: ${data.attendees_count}\n\nMINUTES:\n${data.minutes||'None'}\n\nRESOLUTIONS:\n${data.resolutions||'None'}`);}
+
+async function loadIncidents(){
+    const filter=document.getElementById('incidentFilter')?.value||'all';
+    let query=window.sb.from('lota_incidents').select('*').order('created_at',{ascending:false});
+    if(filter!=='all')query=query.eq('status',filter);
+    const {data}=await query;const incidents=data||[];
+    document.getElementById('mod-incidents').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Incident & Disciplinary System</h2><p style="color:#64748b;font-size:0.875rem;">Disputes, complaints and case tracking</p></div>
+        <button onclick="showIncidentForm()" class="btn-primary"><i class="fas fa-plus"></i> Log Incident</button>
+    </div>
+    <div id="incidentForm" class="card p-6 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Type</label><select id="iType"><option value="dispute">Dispute</option><option value="complaint">Complaint</option><option value="warning">Warning</option><option value="disciplinary">Disciplinary</option><option value="accident">Accident</option><option value="fine">Fine</option></select></div>
+            <div><label>Member</label><select id="iMember"><option value="">Select member...</option>${allMembers.map(m=>`<option value="${m.id}">${m.full_name}</option>`).join('')}</select></div>
+            <div><label>Vehicle</label><select id="iVehicle"><option value="">Select vehicle...</option>${allVehicles.map(v=>`<option value="${v.id}">${v.plate_number}</option>`).join('')}</select></div>
+            <div><label>Date</label><input id="iDate" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+            <div><label>Severity</label><select id="iSeverity"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div>
+            <div><label>Status</label><select id="iStatus"><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></div>
+            <div style="grid-column:1/-1;"><label>Description</label><textarea id="iDesc" placeholder="Describe the incident..." style="height:80px;resize:vertical;"></textarea></div>
+            <div style="grid-column:1/-1;"><label>Action Taken</label><textarea id="iAction" placeholder="Actions taken..." style="height:60px;resize:vertical;"></textarea></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addIncident()" class="btn-primary"><i class="fas fa-save"></i> Log</button>
+            <button onclick="document.getElementById('incidentForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div style="padding:1rem;border-bottom:1px solid #e2e8f0;"><select id="incidentFilter" onchange="loadIncidents()" style="width:auto;"><option value="all">All</option><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option></select></div>
+        <div class="table-row table-head" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span>Date</span><span>Description</span><span>Member</span><span>Type</span><span>Status</span><span>Severity</span></div>
+        <div>${incidents.length===0?'<div style="padding:2rem;text-align:center;color:#94a3b8;">No incidents</div>':incidents.map(i=>`<div class="table-row" style="grid-template-columns:1fr 1.5fr 1fr 1fr 1fr 80px;"><span style="font-size:0.85rem;">${new Date(i.created_at).toLocaleDateString('en-ZA')}</span><span style="font-size:0.85rem;">${(i.description||'').substring(0,50)}${(i.description||'').length>50?'...':''}</span><span style="font-size:0.85rem;">${i.member_name||'—'}</span><span class="badge badge-blue">${i.incident_type}</span><span class="badge badge-${i.status==='open'?'red':i.status==='resolved'?'green':'yellow'}">${i.status}</span><span class="badge badge-${i.severity==='critical'?'red':i.severity==='high'?'yellow':'gray'}">${i.severity}</span></div>`).join('')}</div>
+    </div>`;
+}
+function showIncidentForm(){const f=document.getElementById('incidentForm');if(f)f.style.display='block';}
+async function addIncident(){
+    const desc=document.getElementById('iDesc').value.trim();if(!desc){alert('Description required');return;}
+    const mSel=document.getElementById('iMember');
+    const {error}=await window.sb.from('lota_incidents').insert([{incident_type:document.getElementById('iType').value,member_id:mSel.value||null,member_name:mSel.value?mSel.options[mSel.selectedIndex]?.text:'',vehicle_id:document.getElementById('iVehicle').value||null,incident_date:document.getElementById('iDate').value||null,severity:document.getElementById('iSeverity').value,status:document.getElementById('iStatus').value,description:desc,action_taken:document.getElementById('iAction').value.trim()}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('incidentForm').style.display='none';await loadIncidents();await loadDashboard();
+}
+
+async function loadNotices(){
+    const {data}=await window.sb.from('lota_communications').select('*').order('created_at',{ascending:false}).limit(20);
+    const notices=data||[];
+    document.getElementById('mod-communications').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Communication Layer</h2><p style="color:#64748b;font-size:0.875rem;">Announcements and operational notices</p></div>
+        <button onclick="showCommForm()" class="btn-primary"><i class="fas fa-plus"></i> New Notice</button>
+    </div>
+    <div id="commForm" class="card p-6 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div><label>Type</label><select id="cType"><option value="announcement">Announcement</option><option value="alert">Alert</option><option value="emergency">Emergency</option><option value="operational">Operational</option><option value="meeting">Meeting Notice</option></select></div>
+            <div><label>Priority</label><select id="cPriority"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+            <div style="grid-column:1/-1;"><label>Title</label><input id="cTitle" placeholder="Notice title"></div>
+            <div style="grid-column:1/-1;"><label>Message</label><textarea id="cMessage" placeholder="Notice content..." style="height:80px;resize:vertical;"></textarea></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addNotice()" class="btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
+            <button onclick="document.getElementById('commForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    ${notices.length===0?'<div class="card p-8" style="text-align:center;color:#94a3b8;">No notices sent yet</div>':notices.map(n=>`<div class="card" style="padding:1.25rem;margin-bottom:0.75rem;border-left:4px solid ${n.priority==='urgent'?'#dc2626':n.priority==='high'?'#d97706':'#1a56db'};"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;"><div><p style="font-weight:700;">${n.title}</p><div style="display:flex;gap:0.5rem;margin-top:0.25rem;"><span class="badge badge-blue">${n.notice_type}</span><span class="badge badge-${n.priority==='urgent'?'red':n.priority==='high'?'yellow':'gray'}">${n.priority}</span></div></div><span style="font-size:0.78rem;color:#94a3b8;">${new Date(n.created_at).toLocaleString('en-ZA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div><p style="font-size:0.875rem;color:#374151;">${n.message}</p></div>`).join('')}`;
+}
+function showCommForm(){const f=document.getElementById('commForm');if(f)f.style.display='block';}
+async function addNotice(){
+    const title=document.getElementById('cTitle').value.trim(),msg=document.getElementById('cMessage').value.trim();
+    if(!title||!msg){alert('Title and message required');return;}
+    const {error}=await window.sb.from('lota_communications').insert([{notice_type:document.getElementById('cType').value,priority:document.getElementById('cPriority').value,title,message:msg,sent_by:currentUser?.full_name||currentUser?.username}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('commForm').style.display='none';await loadNotices();
+}
+
+async function loadAnalytics(){
+    const [mRes,fRes,rRes,iRes]=await Promise.all([
+        window.sb.from('lota_members').select('status,member_type'),
+        window.sb.from('lota_finance').select('type,amount'),
+        window.sb.from('lota_routes').select('from_location,to_location,status'),
+        window.sb.from('lota_incidents').select('incident_type,status,severity')
+    ]);
+    const members=mRes.data||[],finance=fRes.data||[],routes=rRes.data||[],incidents=iRes.data||[];
+    const income=finance.filter(f=>['membership_fee','income','collection'].includes(f.type)).reduce((s,f)=>s+parseFloat(f.amount||0),0);
+    const expenses=finance.filter(f=>f.type==='expense').reduce((s,f)=>s+parseFloat(f.amount||0),0);
+    document.getElementById('mod-analytics').innerHTML=`
+    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;">Reporting & Analytics</h2><p style="color:#64748b;font-size:0.875rem;">Operational trends and audit reports</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="card p-5"><div class="section-header"><i class="fas fa-users" style="color:#1a56db;"></i> Member Activity</div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Active</span><span class="badge badge-green">${members.filter(m=>m.status==='active').length}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Suspended</span><span class="badge badge-red">${members.filter(m=>m.status==='suspended').length}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;"><span style="font-size:0.875rem;">Total</span><span class="badge badge-blue">${members.length}</span></div>
+        </div>
+        <div class="card p-5"><div class="section-header"><i class="fas fa-money-bill" style="color:#059669;"></i> Fee Compliance</div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Total Income</span><span style="color:#059669;font-weight:700;">R${income.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Total Expenses</span><span style="color:#dc2626;font-weight:700;">R${expenses.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;"><span style="font-size:0.875rem;">Net</span><span style="color:#1a56db;font-weight:700;">R${(income-expenses).toFixed(2)}</span></div>
+        </div>
+        <div class="card p-5"><div class="section-header"><i class="fas fa-route" style="color:#1a56db;"></i> Route Activity</div>
+            ${routes.length===0?'<p style="color:#94a3b8;">No routes</p>':routes.map(r=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">${r.from_location} → ${r.to_location}</span><span class="badge badge-${r.status==='active'?'green':'red'}">${r.status}</span></div>`).join('')}
+        </div>
+        <div class="card p-5"><div class="section-header"><i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i> Incident Trends</div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Open</span><span class="badge badge-red">${incidents.filter(i=>i.status==='open').length}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Critical</span><span class="badge badge-red">${incidents.filter(i=>i.severity==='critical').length}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.5rem 0;"><span style="font-size:0.875rem;">Total</span><span class="badge badge-gray">${incidents.length}</span></div>
+        </div>
+    </div>`;
+}
+
+const saved=sessionStorage.getItem('lota_user');
+if(saved){currentUser=JSON.parse(saved);initApp();}
+</script>
+</body>
+</html>
