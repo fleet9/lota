@@ -452,8 +452,8 @@ function renderModuleDrivers(){
         </div>
     </div>
     <div class="card" style="overflow:hidden;">
-        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><span>Driver</span><span>Role</span><span>Vehicle</span><span>PDP Expiry</span><span>Status</span><span></span></div>
-        <div>${allDrivers.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No drivers yet</div>':allDrivers.map(d=>{const pdpExp=d.pdp_expiry?new Date(d.pdp_expiry):null;const warn=pdpExp&&pdpExp<new Date(now.getTime()+30*24*60*60*1000);return `<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;"><div><p style="font-weight:600;">${d.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${d.phone||''}</p></div><span class="badge badge-blue">${d.role||'driver'}</span><span style="font-size:0.85rem;">${d.vehicle_plate||'—'}</span><span style="font-size:0.8rem;color:${warn?'#dc2626':'#374151'};">${pdpExp?pdpExp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${d.status==='active'?'green':d.status==='suspended'?'red':'yellow'}">${d.status}</span><button onclick="deleteDriver('${d.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`;}).join('')}</div>
+        <div class="table-row table-head" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 110px;"><span>Driver</span><span>Role</span><span>Vehicle</span><span>PDP Expiry</span><span>Status</span><span></span></div>
+        <div>${allDrivers.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No drivers yet</div>':allDrivers.map(d=>{const pdpExp=d.pdp_expiry?new Date(d.pdp_expiry):null;const warn=pdpExp&&pdpExp<new Date(now.getTime()+30*24*60*60*1000);return `<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 110px;"><div><p style="font-weight:600;">${d.full_name}</p><p style="font-size:0.78rem;color:#64748b;">${d.phone||''}</p></div><span class="badge badge-blue">${d.role||'driver'}</span><span style="font-size:0.85rem;">${d.vehicle_plate||'—'}</span><span style="font-size:0.8rem;color:${warn?'#dc2626':'#374151'};">${pdpExp?pdpExp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${d.status==='active'?'green':d.status==='suspended'?'red':'yellow'}">${d.status}</span><div style="display:flex;gap:0.4rem;"><button onclick="printDriverCard('${d.id}')" class="btn-secondary" style="padding:0.3rem 0.6rem;font-size:0.75rem;" title="Print ID card"><i class="fas fa-id-card"></i></button><button onclick="deleteDriver('${d.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div></div>`;}).join('')}</div>
     </div>`;
 }
 function showDriverForm(){const f=document.getElementById('driverForm');if(f)f.style.display='block';}
@@ -465,6 +465,50 @@ async function addDriver(){
     document.getElementById('driverForm').style.display='none';await loadDrivers();
 }
 async function deleteDriver(id){if(!confirm('Remove driver?'))return;await window.sb.from('lota_drivers').delete().eq('id',id);await loadDrivers();}
+function printDriverCard(id){
+    const d=allDrivers.find(x=>x.id===id);
+    if(!d){alert('Driver not found');return;}
+    const pdpExp=d.pdp_expiry?new Date(d.pdp_expiry).toLocaleDateString('en-ZA'):'\u2014';
+    const photo=d.photo_url?`<img src="${d.photo_url}" style="width:100%;height:100%;object-fit:cover;">`:`<i class="fas fa-user" style="font-size:2.5rem;color:rgba(0,212,180,0.4);"></i>`;
+    const w=window.open('','_blank','width=480,height=320');
+    w.document.write(`<!DOCTYPE html><html><head><title>Driver ID Card - ${d.full_name}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @page { size: 85.6mm 53.98mm; margin: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .card {
+            width: 85.6mm; height: 53.98mm; padding: 4mm;
+            background: linear-gradient(135deg, #0f1f2e 0%, #0d2137 50%, #0a1f1a 100%);
+            color: #e2e8f0; display: flex; gap: 3mm; position: relative; overflow: hidden;
+        }
+        .card::after { content:''; position:absolute; width:60mm; height:60mm; border-radius:50%; background:radial-gradient(circle,rgba(0,210,180,0.12) 0%,transparent 70%); top:-20mm; right:-20mm; }
+        .photo { width: 18mm; height: 22mm; background: rgba(255,255,255,0.06); border: 1px solid rgba(0,210,180,0.3); border-radius: 2mm; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; position:relative; z-index:1; }
+        .info { flex:1; position:relative; z-index:1; }
+        .org { font-size: 7pt; font-weight:800; color:#00d4b4; letter-spacing:0.5px; text-transform:uppercase; }
+        .name { font-size: 11pt; font-weight:800; margin-top:1.5mm; color:#fff; }
+        .role { font-size: 7pt; color:rgba(255,255,255,0.5); margin-top:0.5mm; text-transform:uppercase; letter-spacing:0.3px; }
+        .row { display:flex; justify-content:space-between; margin-top:2mm; font-size:7pt; }
+        .label { color:rgba(0,212,180,0.7); font-weight:700; text-transform:uppercase; letter-spacing:0.3px; }
+        .val { color:#e2e8f0; font-weight:600; }
+        @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    </style></head><body>
+    <div class="card">
+        <div class="photo">${photo}</div>
+        <div class="info">
+            <div class="org">Local Operations Taxi Association</div>
+            <div class="name">${d.full_name}</div>
+            <div class="role">${d.role||'Driver'}</div>
+            <div class="row"><span class="label">PDP No.</span><span class="val">${d.pdp_number||'\u2014'}</span></div>
+            <div class="row"><span class="label">PDP Exp.</span><span class="val">${pdpExp}</span></div>
+            <div class="row"><span class="label">Vehicle</span><span class="val">${d.vehicle_plate||'\u2014'}</span></div>
+        </div>
+    </div>
+    <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+    w.document.close();
+}
+
 
 async function loadAttendance(){
     const {data}=await window.sb.from('lota_attendance').select('*').order('date',{ascending:false}).order('driver_name');
