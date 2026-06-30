@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="supabase-init.js"></script>
+</head>
+<body style="font-family:monospace;padding:1rem;white-space:pre-wrap;word-break:break-all;">
+<div id="out">Testing...</div>
+<script>
+(async () => {
+  const { data, error } = await window.sb.auth.signInWithPassword({
+    email: 'admin@lota-admin.local',
+    password: 'Lota-admin-9999'
+  });
+  document.getElementById('out').textContent = JSON.stringify({data, error}, null, 2);
+})();
+</script>
+</body></html>
