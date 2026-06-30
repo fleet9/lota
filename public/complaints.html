@@ -3,74 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>File a Complaint - L.O.T.A</title>
+<title>L.O.T.A - Passenger Complaints</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="supabase-init.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: linear-gradient(135deg, #0f1f2e 0%, #0d2137 40%, #0a1f1a 100%); min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #e2e8f0; display:flex; align-items:center; justify-content:center; padding:1.5rem; position:relative; overflow-x:hidden; }
-body::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(0,210,180,0.06) 0%,transparent 70%); top:-200px; right:-200px; pointer-events:none; }
-.wrap { width:100%; max-width:520px; position:relative; z-index:1; }
-.card { background: rgba(255,255,255,0.05); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); border: 1px solid rgba(0,210,180,0.15); border-radius: 24px; padding: 2.5rem; box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08) inset; }
-.logo { width:64px; height:64px; background:linear-gradient(135deg,#00d4b4,#00a896); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; box-shadow:0 8px 24px rgba(0,212,180,0.4); }
-h1 { font-size:1.4rem; font-weight:900; color:#00d4b4; letter-spacing:1px; text-align:center; text-shadow:0 0 30px rgba(0,212,180,0.4); }
-.sub { color:rgba(255,255,255,0.4); font-size:0.85rem; text-align:center; margin-top:0.4rem; margin-bottom:1.75rem; }
+body { background: linear-gradient(135deg, #0f1f2e 0%, #0d2137 40%, #0a1f1a 100%); min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #e2e8f0; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: rgba(0,210,180,0.2); border-radius: 3px; }
+
+.topbar { display:none; background:rgba(10,25,40,0.9); backdrop-filter:blur(20px); border-bottom:1px solid rgba(0,210,180,0.1); padding:0 1rem; height:56px; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; }
+.topbar .burger { background:none; border:none; color:#00d4b4; font-size:1.4rem; cursor:pointer; }
+
+.shell { display:flex; min-height:100vh; }
+aside.sidebar { width:240px; background:rgba(8,20,32,0.7); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-right:1px solid rgba(0,210,180,0.08); padding:1.5rem 1rem; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; z-index:150; transition:left 0.25s; }
+.brand { display:flex; align-items:center; gap:0.75rem; padding:0 0.5rem 1.5rem; margin-bottom:1rem; border-bottom:1px solid rgba(0,210,180,0.08); }
+.brand .logo { width:38px; height:38px; background:linear-gradient(135deg,#00d4b4,#00a896); border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,212,180,0.35); flex-shrink:0; }
+.brand .name { font-weight:800; color:#00d4b4; letter-spacing:1px; font-size:0.95rem; }
+.brand .sub { color:rgba(255,255,255,0.3); font-size:0.7rem; }
+.nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.7rem 1rem; border-radius:10px; cursor:pointer; font-size:0.875rem; font-weight:500; color:rgba(255,255,255,0.55); transition:all 0.2s; margin-bottom:0.25rem; }
+.nav-item:hover { background:rgba(0,210,180,0.08); color:#00d4b4; }
+.nav-item.active { background:rgba(0,210,180,0.12); color:#00d4b4; font-weight:700; border-left:3px solid #00d4b4; }
+.nav-item i { width:18px; text-align:center; }
+.nav-cta { margin-top:1.5rem; }
+
+main.content { flex:1; padding:2.5rem; overflow-y:auto; max-width:900px; }
+.section { display:none; }
+.section.active { display:block; animation:fadeIn 0.3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+.hero { padding:2rem 0 1rem; }
+.hero h1 { font-size:2rem; font-weight:900; color:#fff; line-height:1.2; }
+.hero .accent { color:#00d4b4; text-shadow:0 0 30px rgba(0,212,180,0.35); }
+.hero p { color:rgba(255,255,255,0.5); font-size:1rem; margin-top:1rem; max-width:520px; line-height:1.6; }
+.hero-actions { margin-top:1.75rem; display:flex; gap:1rem; flex-wrap:wrap; }
+
+.card { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,210,180,0.12); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); padding:1.5rem; }
+.grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.25rem; margin-top:1.75rem; }
+.grid3 .card i { font-size:1.5rem; color:#00d4b4; margin-bottom:0.75rem; }
+.grid3 .card h3 { font-size:1rem; font-weight:700; margin-bottom:0.4rem; }
+.grid3 .card p { color:rgba(255,255,255,0.45); font-size:0.85rem; line-height:1.5; }
+
+h2.page-title { font-size:1.5rem; font-weight:800; color:#fff; margin-bottom:0.4rem; }
+.page-sub { color:rgba(255,255,255,0.4); font-size:0.9rem; margin-bottom:1.75rem; }
+
+.steps { margin-top:1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+.step { display:flex; gap:1rem; align-items:flex-start; }
+.step .num { width:34px; height:34px; border-radius:50%; background:rgba(0,210,180,0.12); border:1px solid rgba(0,210,180,0.3); color:#00d4b4; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.step h4 { font-size:0.95rem; font-weight:700; margin-bottom:0.25rem; }
+.step p { color:rgba(255,255,255,0.45); font-size:0.85rem; line-height:1.5; }
+
 label { color:rgba(0,212,180,0.8); font-size:0.75rem; font-weight:700; display:block; margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.06em; }
-input, select, textarea { background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,210,180,0.03)); border: 1px solid rgba(0,210,180,0.15); border-radius: 10px; color: #e2e8f0; padding: 0.7rem 0.9rem; width: 100%; font-size: 0.9rem; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); backdrop-filter: blur(8px); }
+input, select, textarea { background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,210,180,0.03)); border: 1px solid rgba(0,210,180,0.15); border-radius: 10px; color: #e2e8f0; padding: 0.7rem 0.9rem; width: 100%; font-size: 0.9rem; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); }
 input:focus, select:focus, textarea:focus { border-color: rgba(0,212,180,0.5); background: rgba(0,210,180,0.06); box-shadow: inset 0 2px 8px rgba(0,0,0,0.2), 0 0 0 3px rgba(0,212,180,0.1); }
 input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
 select option { background:#0d2137; color:#e2e8f0; }
 .field { margin-bottom:1.1rem; }
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-.btn-primary { background: linear-gradient(135deg, #00d4b4, #00a896); border: none; color: #0a1f1a; font-weight: 700; cursor: pointer; border-radius: 10px; padding: 0.85rem 1.25rem; font-size:1rem; width:100%; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,212,180,0.3); }
+
+.btn-primary { background: linear-gradient(135deg, #00d4b4, #00a896); border: none; color: #0a1f1a; font-weight: 700; cursor: pointer; border-radius: 10px; padding: 0.8rem 1.4rem; font-size:0.95rem; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,212,180,0.3); }
 .btn-primary:hover { background: linear-gradient(135deg, #00e8c8, #00baa8); box-shadow: 0 6px 20px rgba(0,212,180,0.45); transform: translateY(-1px); }
 .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-.success { text-align:center; padding:1rem 0; }
+.btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 600; cursor: pointer; border-radius: 10px; padding: 0.8rem 1.4rem; font-size:0.95rem; transition:all 0.2s; }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(0,210,180,0.3); color: #00d4b4; }
+
+.success { text-align:center; padding:2rem 0; }
 .success i { font-size:3rem; color:#00d4b4; margin-bottom:1rem; }
-.success h2 { font-size:1.2rem; font-weight:800; margin-bottom:0.5rem; }
-.success p { color:rgba(255,255,255,0.5); font-size:0.875rem; }
+.success h2 { font-size:1.3rem; font-weight:800; margin-bottom:0.5rem; }
+.success p { color:rgba(255,255,255,0.5); font-size:0.9rem; max-width:420px; margin:0 auto; }
 .error-msg { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); color:#f87171; padding:0.7rem 1rem; border-radius:10px; font-size:0.85rem; margin-bottom:1rem; display:none; }
-.foot { text-align:center; color:rgba(255,255,255,0.2); font-size:0.75rem; margin-top:1.5rem; }
+
+.contact-list { margin-top:1.5rem; display:flex; flex-direction:column; gap:1rem; }
+.contact-item { display:flex; align-items:center; gap:1rem; }
+.contact-item i { width:40px; height:40px; border-radius:10px; background:rgba(0,210,180,0.1); color:#00d4b4; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.contact-item .label { font-size:0.75rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em; }
+.contact-item .val { font-weight:600; }
+
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+
+@media (max-width: 820px) {
+    .topbar { display:flex; }
+    aside.sidebar { position:fixed; left:-260px; top:0; height:100vh; z-index:200; }
+    aside.sidebar.open { left:0; }
+    .overlay.open { display:block; }
+    main.content { padding:1.5rem; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-    <div class="card">
-        <div id="formView">
-            <div class="logo"><i class="fas fa-comment-dots" style="color:white;font-size:1.4rem;"></i></div>
-            <h1>File a Complaint</h1>
-            <p class="sub">L.O.T.A &mdash; Local Operations Taxi Association</p>
-            <div id="errorMsg" class="error-msg"></div>
-            <div class="field"><label>Your Name (optional)</label><input id="cName" placeholder="Full name"></div>
-            <div class="field"><label>Phone Number *</label><input id="cPhone" placeholder="For follow-up" type="tel"></div>
-            <div class="row2">
-                <div class="field"><label>Complaint Type *</label><select id="cType">
-                    <option value="driver_conduct">Driver Conduct</option>
-                    <option value="overcharging">Overcharging</option>
-                    <option value="vehicle_condition">Vehicle Condition</option>
-                    <option value="reckless_driving">Reckless Driving</option>
-                    <option value="route_deviation">Route Deviation</option>
-                    <option value="other">Other</option>
-                </select></div>
-                <div class="field"><label>Date *</label><input id="cDate" type="date"></div>
-            </div>
-            <div class="field"><label>Route (e.g. Soweto to JHB CBD)</label><input id="cRoute" placeholder="Where it happened"></div>
-            <div class="field"><label>Vehicle Plate / Description</label><input id="cVehicle" placeholder="Plate number or vehicle description (if known)"></div>
-            <div class="field"><label>What Happened? *</label><textarea id="cDescription" placeholder="Describe the complaint in detail..." style="height:100px;resize:vertical;"></textarea></div>
-            <button onclick="submitComplaint()" id="submitBtn" class="btn-primary"><i class="fas fa-paper-plane"></i> Submit Complaint</button>
-        </div>
-        <div id="successView" style="display:none;" class="success">
-            <i class="fas fa-check-circle"></i>
-            <h2>Complaint Submitted</h2>
-            <p>Thank you. Your complaint has been logged and will be reviewed by the association. We may contact you on the number provided for follow-up.</p>
-            <button onclick="resetForm()" class="btn-primary" style="margin-top:1.5rem;"><i class="fas fa-plus"></i> Submit Another</button>
-        </div>
-    </div>
-    <p class="foot">L.O.T.A Public Complaints Portal</p>
+
+<div class="topbar">
+    <button class="burger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <span style="font-weight:800;color:#00d4b4;letter-spacing:1px;">L.O.T.A</span>
+    <span style="width:24px;"></span>
 </div>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="logo"><i class="fas fa-taxi" style="color:white;font-size:1rem;"></i></div>
+            <div><div class="name">L.O.T.A</div><div class="sub">Taxi Association</div></div>
+        </div>
+        <div class="nav-item active" onclick="showSection('home',this)"><i class="fas fa-home"></i> Home</div>
+        <div class="nav-item" onclick="showSection('how',this)"><i class="fas fa-list-check"></i> How It Works</div>
+        <div class="nav-item" onclick="showSection('form',this)"><i class="fas fa-file-pen"></i> File a Complaint</div>
+        <div class="nav-item" onclick="showSection('contact',this)"><i class="fas fa-circle-info"></i> About &amp; Contact</div>
+        <div class="nav-cta">
+            <button class="btn-primary" style="width:100%;" onclick="showSection('form', document.querySelectorAll('.nav-item')[2])"><i class="fas fa-paper-plane"></i> File a Complaint</button>
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <div class="section active" id="sec-home">
+            <div class="hero">
+                <h1>Your Voice Keeps Our<br><span class="accent">Routes Safe &amp; Fair</span></h1>
+                <p>L.O.T.A (Local Operations Taxi Association) is committed to safe, respectful and reliable service across our routes. If something went wrong on a trip, tell us &mdash; every complaint is reviewed by the association.</p>
+                <div class="hero-actions">
+                    <button class="btn-primary" onclick="showSection('form', document.querySelectorAll('.nav-item')[2])"><i class="fas fa-paper-plane"></i> File a Complaint</button>
+                    <button class="btn-secondary" onclick="showSection('how', document.querySelectorAll('.nav-item')[1])"><i class="fas fa-list-check"></i> How It Works</button>
+                </div>
+            </div>
+            <div class="grid3">
+                <div class="card"><i class="fas fa-shield-halved"></i><h3>Taken Seriously</h3><p>Every complaint is logged and reviewed by association leadership, not ignored.</p></div>
+                <div class="card"><i class="fas fa-phone"></i><h3>We Follow Up</h3><p>Leave your number and we may contact you directly about your complaint.</p></div>
+                <div class="card"><i class="fas fa-lock"></i><h3>Quick &amp; Simple</h3><p>No account or login needed &mdash; just fill in what happened and submit.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sec-how">
+            <h2 class="page-title">How It Works</h2>
+            <p class="page-sub">Filing a complaint takes about two minutes.</p>
+            <div class="steps">
+                <div class="step"><div class="num">1</div><div><h4>Tell us what happened</h4><p>Select the type of complaint and describe the incident in your own words &mdash; route, vehicle and date if you remember them.</p></div></div>
+                <div class="step"><div class="num">2</div><div><h4>Leave a contact number</h4><p>A phone number is required so the association can follow up with you if more detail is needed.</p></div></div>
+                <div class="step"><div class="num">3</div><div><h4>Submit</h4><p>Your complaint is logged directly with the association for review.</p></div></div>
+                <div class="step"><div class="num">4</div><div><h4>Reviewed by leadership</h4><p>Complaints are reviewed and, where appropriate, escalated into formal disciplinary cases against the driver or vehicle owner involved.</p></div></div>
+            </div>
+            <div style="margin-top:2rem;"><button class="btn-primary" onclick="showSection('form', document.querySelectorAll('.nav-item')[2])"><i class="fas fa-paper-plane"></i> File a Complaint Now</button></div>
+        </div>
+
+        <div class="section" id="sec-form">
+            <h2 class="page-title">File a Complaint</h2>
+            <p class="page-sub">Please provide as much detail as possible.</p>
+            <div class="card" style="max-width:560px;">
+                <div id="formView">
+                    <div id="errorMsg" class="error-msg"></div>
+                    <div class="field"><label>Your Name (optional)</label><input id="cName" placeholder="Full name"></div>
+                    <div class="field"><label>Phone Number *</label><input id="cPhone" placeholder="For follow-up" type="tel"></div>
+                    <div class="row2">
+                        <div class="field"><label>Complaint Type *</label><select id="cType">
+                            <option value="driver_conduct">Driver Conduct</option>
+                            <option value="overcharging">Overcharging</option>
+                            <option value="vehicle_condition">Vehicle Condition</option>
+                            <option value="reckless_driving">Reckless Driving</option>
+                            <option value="route_deviation">Route Deviation</option>
+                            <option value="other">Other</option>
+                        </select></div>
+                        <div class="field"><label>Date *</label><input id="cDate" type="date"></div>
+                    </div>
+                    <div class="field"><label>Route (e.g. Soweto to JHB CBD)</label><input id="cRoute" placeholder="Where it happened"></div>
+                    <div class="field"><label>Vehicle Plate / Description</label><input id="cVehicle" placeholder="Plate number or vehicle description (if known)"></div>
+                    <div class="field"><label>What Happened? *</label><textarea id="cDescription" placeholder="Describe the complaint in detail..." style="height:100px;resize:vertical;"></textarea></div>
+                    <button onclick="submitComplaint()" id="submitBtn" class="btn-primary" style="width:100%;"><i class="fas fa-paper-plane"></i> Submit Complaint</button>
+                </div>
+                <div id="successView" style="display:none;" class="success">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>Complaint Submitted</h2>
+                    <p>Thank you. Your complaint has been logged and will be reviewed by the association. We may contact you on the number provided for follow-up.</p>
+                    <button onclick="resetForm()" class="btn-primary" style="margin-top:1.5rem;"><i class="fas fa-plus"></i> Submit Another</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="sec-contact">
+            <h2 class="page-title">About &amp; Contact</h2>
+            <p class="page-sub">Local Operations Taxi Association</p>
+            <div class="card" style="max-width:560px;">
+                <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;line-height:1.6;">L.O.T.A represents drivers, owners and operators across our routes, working to keep services safe, fair and reliable for every passenger. This portal lets any passenger raise a concern directly with the association.</p>
+                <div class="contact-list">
+                    <div class="contact-item"><i class="fas fa-shield-halved"></i><div><div class="label">Governing Body</div><div class="val">L.O.T.A Management Committee</div></div></div>
+                    <div class="contact-item"><i class="fas fa-comment-dots"></i><div><div class="label">Complaints</div><div class="val">Use the form to reach us directly</div></div></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
 <script>
 document.getElementById('cDate').value = new Date().toISOString().split('T')[0];
+
+function showSection(id, navEl) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    document.querySelector('main.content').scrollTop = 0;
+    if (window.innerWidth <= 820) closeSidebar();
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+}
 
 function showError(msg) {
     const el = document.getElementById('errorMsg');
@@ -100,18 +243,15 @@ async function submitComplaint() {
     const route = document.getElementById('cRoute').value.trim();
     const vehicle = document.getElementById('cVehicle').value.trim();
 
-    let fullDescription = description;
-    if (route) fullDescription += '\n\nRoute: ' + route;
-    if (vehicle) fullDescription += '\nVehicle: ' + vehicle;
-
-    const { error } = await window.sb.from('lota_incidents').insert([{
-        incident_type: type,
-        member_name: name || 'Public Complaint',
+    const { error } = await window.sb.from('lota_complaints').insert([{
+        complainant_name: name || null,
         complainant_phone: phone,
+        complaint_type: type,
         incident_date: date,
-        severity: 'medium',
-        status: 'open',
-        description: fullDescription
+        route: route || null,
+        vehicle_description: vehicle || null,
+        description: description,
+        status: 'new'
     }]);
 
     btn.disabled = false;
