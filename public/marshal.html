@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L.O.T.A - Marshal</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="supabase-init.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: linear-gradient(135deg, #0f1f2e 0%, #0d2137 40%, #0a1f1a 100%); min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #e2e8f0; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: rgba(0,210,180,0.2); border-radius: 3px; }
+
+#loginScreen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:1rem; position:relative; overflow:hidden; }
+#loginScreen .glow1 { position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(0,210,180,0.06) 0%,transparent 70%); top:-200px; right:-200px; pointer-events:none; }
+.login-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); border: 1px solid rgba(0,210,180,0.15); border-radius: 24px; padding: 2.5rem; width:100%; max-width:380px; box-shadow: 0 32px 80px rgba(0,0,0,0.6); position:relative; z-index:1; }
+.login-logo { width:64px; height:64px; background:linear-gradient(135deg,#00d4b4,#00a896); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; box-shadow:0 8px 24px rgba(0,212,180,0.4); }
+.login-card h1 { font-size:1.5rem; font-weight:900; color:#00d4b4; text-align:center; letter-spacing:1px; text-shadow:0 0 30px rgba(0,212,180,0.4); }
+.login-card .sub { color:rgba(255,255,255,0.4); font-size:0.85rem; text-align:center; margin-top:0.3rem; margin-bottom:1.75rem; }
+
+label { color:rgba(0,212,180,0.8); font-size:0.75rem; font-weight:700; display:block; margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.06em; }
+input, select { background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,210,180,0.03)); border: 1px solid rgba(0,210,180,0.15); border-radius: 10px; color: #e2e8f0; padding: 0.7rem 0.9rem; width: 100%; font-size: 0.9rem; outline: none; transition:all 0.2s; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); }
+input:focus, select:focus { border-color: rgba(0,212,180,0.5); background: rgba(0,210,180,0.06); box-shadow: inset 0 2px 8px rgba(0,0,0,0.2), 0 0 0 3px rgba(0,212,180,0.1); }
+input::placeholder { color: rgba(255,255,255,0.25); }
+select option { background:#0d2137; color:#e2e8f0; }
+.field { margin-bottom:1.1rem; }
+
+.btn-primary { background: linear-gradient(135deg, #00d4b4, #00a896); border: none; color: #0a1f1a; font-weight: 700; cursor: pointer; border-radius: 10px; padding: 0.85rem 1.25rem; font-size:1rem; width:100%; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,212,180,0.3); }
+.btn-primary:hover { background: linear-gradient(135deg, #00e8c8, #00baa8); }
+.btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 600; cursor: pointer; border-radius: 10px; padding: 0.7rem 1.1rem; font-size:0.9rem; transition:all 0.2s; }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(0,210,180,0.3); color: #00d4b4; }
+.btn-success { background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; font-weight: 700; cursor: pointer; border-radius: 8px; padding: 0.45rem 0.9rem; font-size:0.85rem; }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: white; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 0.45rem 0.9rem; font-size:0.85rem; }
+.error-msg { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); color:#f87171; padding:0.7rem 1rem; border-radius:10px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+
+#mainApp { display:none; min-height:100vh; }
+nav.topnav { background:rgba(10,25,40,0.85); backdrop-filter:blur(20px); border-bottom:1px solid rgba(0,210,180,0.1); padding:0 1.5rem; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 4px 24px rgba(0,0,0,0.4); }
+.brand { display:flex; align-items:center; gap:0.75rem; }
+.brand .logo { width:36px; height:36px; background:linear-gradient(135deg,#00d4b4,#00a896); border-radius:8px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,212,180,0.3); }
+.brand .name { font-weight:800; color:#00d4b4; letter-spacing:1px; }
+.brand .sub { color:rgba(255,255,255,0.3); font-size:0.75rem; }
+
+main.shell { padding:1.5rem; max-width:760px; margin:0 auto; }
+.card { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,210,180,0.12); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.p-5 { padding:1.25rem; }
+.p-6 { padding:1.5rem; }
+.mb-4 { margin-bottom:1rem; }
+.mb-6 { margin-bottom:1.5rem; }
+.badge { display:inline-block; padding:0.2rem 0.65rem; border-radius:20px; font-size:0.72rem; font-weight:700; }
+.badge-green { background: rgba(16,185,129,0.15); color: #34d399; border:1px solid rgba(16,185,129,0.2); }
+.badge-red { background: rgba(239,68,68,0.15); color: #f87171; border:1px solid rgba(239,68,68,0.2); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; border:1px solid rgba(245,158,11,0.2); }
+.badge-blue { background: rgba(0,210,180,0.12); color: #00d4b4; border:1px solid rgba(0,210,180,0.2); }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+    <div class="glow1"></div>
+    <div class="login-card">
+        <div class="login-logo"><i class="fas fa-taxi" style="color:white;font-size:1.4rem;"></i></div>
+        <h1>L.O.T.A Marshal</h1>
+        <p class="sub">Rank &amp; Queue Operations</p>
+        <div id="errorMsg" class="error-msg"></div>
+        <div class="field"><label>Username</label><input id="loginUsername" placeholder="Username"></div>
+        <div class="field"><label>PIN</label><input id="loginPin" placeholder="PIN" type="password" inputmode="numeric"></div>
+        <button onclick="marshalLogin()" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+    </div>
+</div>
+
+<div id="mainApp">
+    <nav class="topnav">
+        <div class="brand">
+            <div class="logo"><i class="fas fa-taxi" style="color:white;font-size:1rem;"></i></div>
+            <div><div class="name">L.O.T.A</div><div class="sub">Marshal Console</div></div>
+        </div>
+        <button onclick="marshalLogout()" class="btn-secondary"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </nav>
+    <main class="shell">
+        <div id="queueArea"><div class="card p-6"><p style="color:rgba(255,255,255,0.4);">Loading queue...</p></div></div>
+    </main>
+</div>
+
+<script>
+let currentUser = null;
+let mVehicles = [], mRoutes = [], mDrivers = [], mQueue = [];
+
+function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+
+async function marshalLogin() {
+    hideError();
+    const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+    const pin = document.getElementById('loginPin').value.trim();
+    if (!username||!pin) { showError('Enter username and PIN'); return; }
+    if (!window.sb) { showError('App still loading'); return; }
+    const email = username + '@lota-admin.local';
+    const password = 'Lota-' + username + '-' + pin;
+    const { data: authData, error: authError } = await window.sb.auth.signInWithPassword({ email, password });
+    if (authError || !authData.user) { showError('Invalid credentials'); return; }
+    const { data: profile, error: profileError } = await window.sb.from('lota_users').select('*').eq('username',username).eq('is_active',true).single();
+    if (profileError || !profile) { showError('Account not active'); await window.sb.auth.signOut(); return; }
+    currentUser = profile;
+    initApp();
+}
+
+async function marshalLogout() { await window.sb.auth.signOut(); location.reload(); }
+
+async function checkSession() {
+    const { data: { session } } = await window.sb.auth.getSession();
+    if (!session) return;
+    const username = session.user.email.split('@')[0];
+    const { data: profile } = await window.sb.from('lota_users').select('*').eq('username',username).eq('is_active',true).single();
+    if (!profile) { await window.sb.auth.signOut(); return; }
+    currentUser = profile;
+    initApp();
+}
+
+async function initApp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    await Promise.all([loadRefData()]);
+    await loadQueue();
+    setInterval(loadQueue, 15000);
+}
+
+async function loadRefData() {
+    const [vRes, rRes, dRes] = await Promise.all([
+        window.sb.from('lota_vehicles').select('id,plate_number,capacity').eq('status','active').order('plate_number'),
+        window.sb.from('lota_routes').select('id,from_location,to_location').eq('status','active').order('from_location'),
+        window.sb.from('lota_drivers').select('id,full_name').eq('status','active').order('full_name')
+    ]);
+    mVehicles = vRes.data||[];
+    mRoutes = rRes.data||[];
+    mDrivers = dRes.data||[];
+}
+
+async function loadQueue() {
+    const { data } = await window.sb.from('lota_queue').select('*').not('status','eq','departed').order('created_at');
+    mQueue = data||[];
+    renderQueue();
+}
+
+function renderQueue() {
+    const sorted=[...mQueue].sort((a,b)=>({'waiting':0,'loading':1,'full':2}[a.status]||0)-({'waiting':0,'loading':1,'full':2}[b.status]||0));
+    document.getElementById('queueArea').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+        <div><h2 style="font-size:1.2rem;font-weight:800;">Live Queue</h2><p style="color:rgba(255,255,255,0.4);font-size:0.82rem;">Signed in as ${currentUser.full_name||currentUser.username}</p></div>
+        <button onclick="showAddForm()" class="btn-primary" style="width:auto;padding:0.6rem 1.1rem;"><i class="fas fa-plus"></i> Add Taxi</button>
+    </div>
+    <div id="addForm" class="card p-5 mb-6" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="field"><label>Vehicle</label><select id="qVehicle"><option value="">Select vehicle...</option>${mVehicles.map(v=>`<option value="${v.id}" data-plate="${v.plate_number}" data-cap="${v.capacity}">${v.plate_number}</option>`).join('')}</select></div>
+            <div class="field"><label>Route</label><select id="qRoute"><option value="">Select route...</option>${mRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} \u2192 ${r.to_location}</option>`).join('')}</select></div>
+            <div class="field"><label>Driver</label><select id="qDriver"><option value="">Select driver...</option>${mDrivers.map(d=>`<option value="${d.id}">${d.full_name}</option>`).join('')}</select></div>
+            <div class="field"><label>Marshal</label><input id="qMarshal" value="${currentUser.full_name||currentUser.username}"></div>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+            <button onclick="addToQueue()" class="btn-primary" style="width:auto;padding:0.65rem 1.25rem;"><i class="fas fa-plus"></i> Add</button>
+            <button onclick="document.getElementById('addForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    ${sorted.length===0?'<div class="card p-6" style="text-align:center;color:rgba(255,255,255,0.25);"><i class="fas fa-bus" style="font-size:2rem;display:block;margin-bottom:0.75rem;"></i>No taxis in queue</div>':sorted.map((q,i)=>{
+        const pct=Math.round((q.seats_filled/q.capacity)*100);const isNext=i===0;
+        return `<div class="card p-5 mb-4" style="${isNext?'border-left:4px solid #00d4b4;box-shadow:-4px 0 16px rgba(0,210,180,0.2);':''}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    ${isNext?'<span class="badge badge-blue">NEXT</span>':`<span style="color:rgba(255,255,255,0.25);">#${i+1}</span>`}
+                    <div><p style="font-weight:700;">${q.plate_number}</p><p style="font-size:0.8rem;color:rgba(255,255,255,0.45);">${q.route_label}${q.driver_name?' \u2022 '+q.driver_name:''}</p></div>
+                </div>
+                <div style="text-align:right;"><p style="font-size:1.4rem;font-weight:900;color:#00d4b4;">${q.seats_filled}/${q.capacity}</p><span class="badge badge-${q.status==='loading'?'yellow':q.status==='full'?'red':'green'}">${q.status.toUpperCase()}</span></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:8px;overflow:hidden;margin-bottom:0.85rem;"><div style="background:linear-gradient(135deg,#00d4b4,#00a896);height:100%;width:${pct}%;border-radius:6px;transition:width 0.4s;"></div></div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button onclick="updateSeats('${q.id}',${q.seats_filled},${q.capacity},1)" class="btn-success"><i class="fas fa-plus"></i> Seat</button>
+                <button onclick="updateSeats('${q.id}',${q.seats_filled},${q.capacity},-1)" class="btn-secondary"><i class="fas fa-minus"></i> Seat</button>
+                <button onclick="markDeparted('${q.id}')" style="background:#d97706;border:none;color:white;padding:0.45rem 0.9rem;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:700;"><i class="fas fa-road"></i> Departed</button>
+                <button onclick="removeFromQueue('${q.id}')" class="btn-danger"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('')}`;
+}
+
+function showAddForm(){ const f=document.getElementById('addForm'); if(f) f.style.display='block'; }
+
+async function addToQueue() {
+    const vSel=document.getElementById('qVehicle'), rSel=document.getElementById('qRoute'), dSel=document.getElementById('qDriver');
+    if(!vSel.value){alert('Select vehicle');return;}
+    if(!rSel.value){alert('Select route');return;}
+    const cap=parseInt(vSel.options[vSel.selectedIndex]?.dataset?.cap)||15;
+    const marshal=document.getElementById('qMarshal').value.trim();
+    const { error } = await window.sb.from('lota_queue').insert([{
+        vehicle_id: vSel.value,
+        plate_number: vSel.options[vSel.selectedIndex]?.dataset?.plate||'',
+        route_id: rSel.value,
+        route_label: rSel.options[rSel.selectedIndex]?.dataset?.label||'',
+        driver_id: dSel.value||null,
+        driver_name: dSel.value?dSel.options[dSel.selectedIndex]?.text:'',
+        capacity: cap,
+        seats_filled: 0,
+        status: 'waiting',
+        marshal_name: marshal
+    }]);
+    if (error) { alert('Error: '+error.message); return; }
+    document.getElementById('addForm').style.display='none';
+    await loadQueue();
+}
+
+async function updateSeats(id,current,capacity,change) {
+    const n=Math.max(0,Math.min(capacity,current+change));
+    const status=n>=capacity?'full':n>0?'loading':'waiting';
+    await window.sb.from('lota_queue').update({seats_filled:n,status}).eq('id',id);
+    await loadQueue();
+}
+
+async function markDeparted(id) {
+    if(!confirm('Mark this taxi as departed?')) return;
+    await window.sb.from('lota_queue').update({status:'departed',departed_at:new Date().toISOString()}).eq('id',id);
+    await loadQueue();
+}
+
+async function removeFromQueue(id) {
+    if(!confirm('Remove from queue?')) return;
+    await window.sb.from('lota_queue').delete().eq('id',id);
+    await loadQueue();
+}
+
+checkSession();
+</script>
+</body>
+</html>
