@@ -192,6 +192,7 @@
             <div class="sidebar-item" onclick="showModule('governance',this)"><i class="fas fa-landmark"></i> Governance</div>
             <hr class="divider">
             <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Compliance</p>
+            <div class="sidebar-item" onclick="showModule('compliance',this)"><i class="fas fa-shield-alt"></i> Compliance</div>
             <div class="sidebar-item" onclick="showModule('incidents',this)"><i class="fas fa-exclamation-triangle"></i> Incidents</div>
             <div class="sidebar-item" onclick="showModule('communications',this)"><i class="fas fa-bullhorn"></i> Communications</div>
             <div class="sidebar-item" onclick="showModule('analytics',this)"><i class="fas fa-chart-bar"></i> Analytics</div>
@@ -206,6 +207,7 @@
             <div id="mod-attendance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading attendance...</p></div></div>
             <div id="mod-finance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading finance...</p></div></div>
             <div id="mod-governance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading governance...</p></div></div>
+            <div id="mod-compliance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading compliance...</p></div></div>
             <div id="mod-incidents" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading incidents...</p></div></div>
             <div id="mod-communications" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading communications...</p></div></div>
             <div id="mod-analytics" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading analytics...</p></div></div>
@@ -255,6 +257,7 @@ function showModule(mod, el) {
     if (mod==='governance') loadMeetings();
     if (mod==='communications') loadNotices();
     if (mod==='attendance') loadAttendance();
+    if (mod==='compliance') loadCompliance();
 }
 
 async function loadDashboard() {
@@ -767,6 +770,57 @@ async function addNotice(){
     const {error}=await window.sb.from('lota_communications').insert([{notice_type:document.getElementById('cType').value,priority:document.getElementById('cPriority').value,title,message:msg,sent_by:currentUser?.full_name||currentUser?.username,sms_sent:document.getElementById('cSMS').checked,recipient_count:parseInt(document.getElementById('cRecipients').value)||0}]);
     if(error){alert('Error: '+error.message);return;}
     document.getElementById('commForm').style.display='none';await loadNotices();
+}
+
+async function loadCompliance(){
+    const [vRes,dRes]=await Promise.all([
+        window.sb.from('lota_vehicles').select('id,plate_number,owner_name,licence_expiry,insurance_expiry,next_inspection,status').eq('status','active'),
+        window.sb.from('lota_drivers').select('id,full_name,pdp_expiry,status').eq('status','active')
+    ]);
+    renderModuleCompliance(vRes.data||[], dRes.data||[]);
+}
+function complianceRow(label,name,field,expiry){
+    const now=new Date();
+    const warnDate=new Date(now.getTime()+30*24*60*60*1000);
+    const exp=expiry?new Date(expiry):null;
+    let badge='gray',statusText='No date set';
+    if(exp){
+        if(exp<now){badge='red';statusText='Expired';}
+        else if(exp<warnDate){badge='yellow';statusText='Expiring soon';}
+        else{badge='green';statusText='Valid';}
+    }
+    return {label,name,field,exp,badge,statusText};
+}
+function renderModuleCompliance(vehicles, drivers){
+    const rows=[];
+    vehicles.forEach(v=>{
+        rows.push(complianceRow('Licence',v.plate_number+' ('+(v.owner_name||'—')+')','licence',v.licence_expiry));
+        rows.push(complianceRow('Insurance',v.plate_number+' ('+(v.owner_name||'—')+')','insurance',v.insurance_expiry));
+        rows.push(complianceRow('Inspection',v.plate_number+' ('+(v.owner_name||'—')+')','inspection',v.next_inspection));
+    });
+    drivers.forEach(d=>{
+        rows.push(complianceRow('PDP',d.full_name,'pdp',d.pdp_expiry));
+    });
+    rows.sort((a,b)=>{
+        const order={red:0,yellow:1,gray:2,green:3};
+        if(order[a.badge]!==order[b.badge]) return order[a.badge]-order[b.badge];
+        if(!a.exp) return 1; if(!b.exp) return -1;
+        return a.exp-b.exp;
+    });
+    const expired=rows.filter(r=>r.badge==='red').length;
+    const soon=rows.filter(r=>r.badge==='yellow').length;
+    const flagged=rows.filter(r=>r.badge==='red'||r.badge==='yellow');
+    document.getElementById('mod-compliance').innerHTML=`
+    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;color:#e2e8f0;">Compliance Reminders</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Expiring licences, insurance, inspections and PDPs</p></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Expired</p><p style="font-size:2rem;font-weight:900;color:#dc2626;">${expired}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Expiring (30d)</p><p style="font-size:2rem;font-weight:900;color:#eab308;">${soon}</p></div>
+        <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Tracked Items</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${rows.length}</p></div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:1fr 2fr 1fr 1fr;"><span>Type</span><span>Reference</span><span>Expiry</span><span>Status</span></div>
+        <div>${flagged.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No expired or soon-to-expire items</div>':flagged.map(r=>`<div class="table-row" style="grid-template-columns:1fr 2fr 1fr 1fr;"><span class="badge badge-blue">${r.label}</span><span style="font-size:0.85rem;">${r.name}</span><span style="font-size:0.85rem;">${r.exp?r.exp.toLocaleDateString('en-ZA'):'—'}</span><span class="badge badge-${r.badge}">${r.statusText}</span></div>`).join('')}</div>
+    </div>`;
 }
 
 async function loadAnalytics(){
