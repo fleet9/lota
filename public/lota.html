@@ -223,18 +223,31 @@ let allMembers = [], allVehicles = [], allDrivers = [], allRoutes = [], allQueue
 setInterval(() => { const el = document.getElementById('lotaClock'); if(el) el.textContent = new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }, 1000);
 
 async function lotaLogin() {
-    const username = document.getElementById('loginUsername').value.trim();
+    const username = document.getElementById('loginUsername').value.trim().toLowerCase();
     const pin = document.getElementById('loginPin').value.trim();
     if (!username||!pin) { alert('Enter username and PIN'); return; }
     if (!window.sb) { alert('App still loading'); return; }
-    const { data, error } = await window.sb.from('lota_users').select('*').eq('username',username).eq('pin',pin).eq('is_active',true).single();
-    if (error||!data) { alert('Invalid credentials'); return; }
-    currentUser = data;
-    sessionStorage.setItem('lota_user', JSON.stringify(data));
+    const email = username + '@lota-admin.local';
+    const password = 'Lota-' + username + '-' + pin;
+    const { data: authData, error: authError } = await window.sb.auth.signInWithPassword({ email, password });
+    if (authError || !authData.user) { alert('Invalid credentials'); return; }
+    const { data: profile, error: profileError } = await window.sb.from('lota_users').select('*').eq('username',username).eq('is_active',true).single();
+    if (profileError || !profile) { alert('Account not active'); await window.sb.auth.signOut(); return; }
+    currentUser = profile;
     initApp();
 }
 
-function lotaLogout() { sessionStorage.removeItem('lota_user'); location.reload(); }
+async function lotaLogout() { await window.sb.auth.signOut(); location.reload(); }
+
+async function checkSession() {
+    const { data: { session } } = await window.sb.auth.getSession();
+    if (!session) return;
+    const username = session.user.email.split('@')[0];
+    const { data: profile } = await window.sb.from('lota_users').select('*').eq('username',username).eq('is_active',true).single();
+    if (!profile) { await window.sb.auth.signOut(); return; }
+    currentUser = profile;
+    initApp();
+}
 
 async function initApp() {
     document.getElementById('loginScreen').style.display = 'none';
@@ -901,8 +914,7 @@ async function loadAnalytics(){
     </div>`;
 }
 
-const saved=sessionStorage.getItem('lota_user');
-if(saved){currentUser=JSON.parse(saved);initApp();}
+checkSession();
 </script>
 </body>
 </html>
