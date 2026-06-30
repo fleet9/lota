@@ -880,7 +880,80 @@ function renderModuleCompliance(vehicles, drivers){
     </div>`;
 }
 
+function setDefaultReportDates(){
+    const to=document.getElementById('repTo');const from=document.getElementById('repFrom');
+    if(to&&!to.value){to.value=new Date().toISOString().split('T')[0];}
+    if(from&&!from.value){const d=new Date();d.setDate(d.getDate()-30);from.value=d.toISOString().split('T')[0];}
+}
+async function generateReport(){
+    setDefaultReportDates();
+    const fromVal=document.getElementById('repFrom').value;
+    const toVal=document.getElementById('repTo').value;
+    const fromDate=new Date(fromVal+'T00:00:00');
+    const toDate=new Date(toVal+'T23:59:59');
+
+    const [rRes,qRes]=await Promise.all([
+        window.sb.from('lota_routes').select('from_location,to_location,status,fare,created_at').gte('created_at',fromDate.toISOString()).lte('created_at',toDate.toISOString()),
+        window.sb.from('lota_queue').select('plate_number,route_label,departed_at').eq('status','departed').gte('departed_at',fromDate.toISOString()).lte('departed_at',toDate.toISOString())
+    ]);
+    const routes=rRes.data||[];
+    const trips=qRes.data||[];
+
+    const byDay={};
+    trips.forEach(t=>{
+        const d=new Date(t.departed_at);
+        const key=d.toLocaleDateString('en-ZA');
+        byDay[key]=(byDay[key]||0)+1;
+    });
+    const dayRows=Object.entries(byDay).sort((a,b)=>new Date(a[0].split('/').reverse().join('-'))-new Date(b[0].split('/').reverse().join('-')));
+
+    const byHour=Array(24).fill(0);
+    trips.forEach(t=>{ byHour[new Date(t.departed_at).getHours()]++; });
+
+    const w=window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><title>L.O.T.A Operations Report</title>
+    <style>
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#1a202c; padding:2rem; }
+        h1 { font-size:1.4rem; font-weight:900; }
+        .sub { color:#64748b; font-size:0.85rem; margin-top:0.25rem; margin-bottom:1.5rem; }
+        h2 { font-size:1rem; font-weight:800; margin:1.75rem 0 0.75rem; border-bottom:2px solid #00a896; padding-bottom:0.3rem; }
+        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        th,td { text-align:left; padding:0.45rem 0.6rem; border-bottom:1px solid #e2e8f0; }
+        th { background:#f1f5f9; font-size:0.72rem; text-transform:uppercase; color:#475569; }
+        .stat-row { display:flex; gap:1.5rem; margin-bottom:0.5rem; flex-wrap:wrap; }
+        .stat { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.75rem 1.1rem; }
+        .stat .num { font-size:1.4rem; font-weight:900; color:#00a896; }
+        .stat .lbl { font-size:0.7rem; text-transform:uppercase; color:#64748b; }
+        .empty { color:#94a3b8; font-size:0.85rem; padding:0.5rem 0; }
+        @media print { body { padding:1rem; } }
+    </style></head><body>
+    <h1>L.O.T.A Operations Report</h1>
+    <div class="sub">Local Operations Taxi Association &middot; ${fromDate.toLocaleDateString('en-ZA')} &ndash; ${toDate.toLocaleDateString('en-ZA')} &middot; Generated ${new Date().toLocaleString('en-ZA')}</div>
+
+    <h2>Trips Summary</h2>
+    <div class="stat-row">
+        <div class="stat"><div class="num">${trips.length}</div><div class="lbl">Total Trips</div></div>
+        <div class="stat"><div class="num">${dayRows.length}</div><div class="lbl">Active Days</div></div>
+        <div class="stat"><div class="num">${dayRows.length?Math.round(trips.length/dayRows.length):0}</div><div class="lbl">Avg Trips/Day</div></div>
+    </div>
+
+    <h2>Trips Per Day</h2>
+    ${dayRows.length===0?'<p class="empty">No departures recorded in this date range</p>':`<table><tr><th>Date</th><th>Trips</th></tr>${dayRows.map(([d,c])=>`<tr><td>${d}</td><td>${c}</td></tr>`).join('')}</table>`}
+
+    <h2>Trips By Time Of Day</h2>
+    ${trips.length===0?'<p class="empty">No departures recorded in this date range</p>':`<table><tr><th>Hour</th><th>Trips</th></tr>${byHour.map((c,h)=>({h,c})).filter(x=>x.c>0).map(x=>`<tr><td>${String(x.h).padStart(2,'0')}:00 - ${String(x.h).padStart(2,'0')}:59</td><td>${x.c}</td></tr>`).join('')}</table>`}
+
+    <h2>Route Activity (Registered ${fromDate.toLocaleDateString('en-ZA')} - ${toDate.toLocaleDateString('en-ZA')})</h2>
+    ${routes.length===0?'<p class="empty">No routes registered in this date range</p>':`<table><tr><th>Route</th><th>Fare</th><th>Status</th><th>Registered</th></tr>${routes.map(r=>`<tr><td>${r.from_location} \u2192 ${r.to_location}</td><td>R${parseFloat(r.fare||0).toFixed(2)}</td><td>${r.status}</td><td>${new Date(r.created_at).toLocaleDateString('en-ZA')}</td></tr>`).join('')}</table>`}
+
+    <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+    w.document.close();
+}
+
 async function loadAnalytics(){
+    setTimeout(setDefaultReportDates,0);
     const [mRes,fRes,rRes,iRes]=await Promise.all([
         window.sb.from('lota_members').select('status,member_type'),
         window.sb.from('lota_finance').select('type,amount'),
@@ -891,7 +964,14 @@ async function loadAnalytics(){
     const income=finance.filter(f=>['membership_fee','income','collection'].includes(f.type)).reduce((s,f)=>s+parseFloat(f.amount||0),0);
     const expenses=finance.filter(f=>f.type==='expense').reduce((s,f)=>s+parseFloat(f.amount||0),0);
     document.getElementById('mod-analytics').innerHTML=`
-    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;">Reporting & Analytics</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Operational trends and audit reports</p></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Reporting & Analytics</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Operational trends and audit reports</p></div>
+        <div style="display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap;">
+            <div><label style="display:block;font-size:0.7rem;color:rgba(0,212,180,0.7);text-transform:uppercase;margin-bottom:0.3rem;">From</label><input id="repFrom" type="date" style="width:auto;"></div>
+            <div><label style="display:block;font-size:0.7rem;color:rgba(0,212,180,0.7);text-transform:uppercase;margin-bottom:0.3rem;">To</label><input id="repTo" type="date" style="width:auto;"></div>
+            <button onclick="generateReport()" class="btn-primary"><i class="fas fa-file-pdf"></i> Generate Report</button>
+        </div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
         <div class="card p-5"><div class="section-header"><i class="fas fa-users" style="color:#00d4b4;"></i> Member Activity</div>
             <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:0.875rem;">Active</span><span class="badge badge-green">${members.filter(m=>m.status==='active').length}</span></div>
