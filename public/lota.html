@@ -185,6 +185,7 @@
             <div class="sidebar-item" onclick="showModule('members',this)"><i class="fas fa-id-card"></i> Members</div>
             <div class="sidebar-item" onclick="showModule('vehicles',this)"><i class="fas fa-bus"></i> Vehicles</div>
             <div class="sidebar-item" onclick="showModule('drivers',this)"><i class="fas fa-user-tie"></i> Drivers</div>
+            <div class="sidebar-item" onclick="showModule('attendance',this)"><i class="fas fa-calendar-check"></i> Attendance</div>
             <hr class="divider">
             <p style="font-size:0.7rem;font-weight:700;color:rgba(0,210,180,0.4);text-transform:uppercase;letter-spacing:0.08em;padding:0.5rem 1rem;margin-bottom:0.25rem;">Finance & Governance</p>
             <div class="sidebar-item" onclick="showModule('finance',this)"><i class="fas fa-money-bill-wave"></i> Finance</div>
@@ -202,6 +203,7 @@
             <div id="mod-members" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading members...</p></div></div>
             <div id="mod-vehicles" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading vehicles...</p></div></div>
             <div id="mod-drivers" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading drivers...</p></div></div>
+            <div id="mod-attendance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading attendance...</p></div></div>
             <div id="mod-finance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading finance...</p></div></div>
             <div id="mod-governance" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading governance...</p></div></div>
             <div id="mod-incidents" style="display:none;"><div class="card p-6"><p style="color:#64748b;">Loading incidents...</p></div></div>
@@ -252,6 +254,7 @@ function showModule(mod, el) {
     if (mod==='incidents') loadIncidents();
     if (mod==='governance') loadMeetings();
     if (mod==='communications') loadNotices();
+    if (mod==='attendance') loadAttendance();
 }
 
 async function loadDashboard() {
@@ -459,6 +462,52 @@ async function addDriver(){
     document.getElementById('driverForm').style.display='none';await loadDrivers();
 }
 async function deleteDriver(id){if(!confirm('Remove driver?'))return;await window.sb.from('lota_drivers').delete().eq('id',id);await loadDrivers();}
+
+async function loadAttendance(){
+    const {data}=await window.sb.from('lota_attendance').select('*').order('date',{ascending:false}).order('driver_name');
+    const today=new Date().toISOString().split('T')[0];
+    renderModuleAttendance(data||[], today);
+}
+function renderModuleAttendance(records, today){
+    const todays=records.filter(r=>r.date===today);
+    document.getElementById('mod-attendance').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Driver Attendance</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">Daily attendance log</p></div>
+        <button onclick="showAttendanceForm()" class="btn-primary"><i class="fas fa-plus"></i> Log Attendance</button>
+    </div>
+    <div id="attendanceForm" class="card p-6 mb-6" style="display:none;">
+        <div class="section-header"><i class="fas fa-calendar-check" style="color:#00d4b4;"></i> Log Attendance</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+            <div><label>Driver</label><select id="aDriver"><option value="">Select driver...</option>${allDrivers.map(d=>`<option value="${d.id}" data-name="${d.full_name}">${d.full_name}</option>`).join('')}</select></div>
+            <div><label>Date</label><input id="aDate" type="date" value="${today}"></div>
+            <div><label>Status</label><select id="aStatus"><option value="present">Present</option><option value="absent">Absent</option><option value="late">Late</option><option value="leave">On Leave</option></select></div>
+            <div style="grid-column:1/-1;"><label>Notes</label><textarea id="aNotes" placeholder="Additional notes..." style="height:60px;resize:vertical;"></textarea></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+            <button onclick="addAttendance()" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onclick="document.getElementById('attendanceForm').style.display='none'" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div class="card p-4 mb-6" style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.875rem;color:rgba(255,255,255,0.5);">Today (${new Date(today).toLocaleDateString('en-ZA')}): <strong style="color:#00d4b4;">${todays.filter(r=>r.status==='present').length} present</strong> &middot; <strong style="color:#dc2626;">${todays.filter(r=>r.status==='absent').length} absent</strong> &middot; <strong style="color:#eab308;">${todays.filter(r=>r.status==='late').length} late</strong></span>
+    </div>
+    <div class="card" style="overflow:hidden;">
+        <div class="table-row table-head" style="grid-template-columns:1fr 2fr 1fr 1.5fr 80px;"><span>Date</span><span>Driver</span><span>Status</span><span>Notes</span><span></span></div>
+        <div>${records.length===0?'<div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.25);">No attendance records yet</div>':records.map(r=>`<div class="table-row" style="grid-template-columns:1fr 2fr 1fr 1.5fr 80px;"><span style="font-size:0.85rem;">${r.date?new Date(r.date).toLocaleDateString('en-ZA'):'\u2014'}</span><span style="font-weight:600;font-size:0.85rem;">${r.driver_name||'\u2014'}</span><span class="badge badge-${r.status==='present'?'green':r.status==='absent'?'red':r.status==='late'?'yellow':'blue'}">${r.status}</span><span style="font-size:0.8rem;color:#64748b;">${r.notes||'\u2014'}</span><button onclick="deleteAttendance('${r.id}')" class="btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;"><i class="fas fa-trash"></i></button></div>`).join('')}</div>
+    </div>`;
+}
+function showAttendanceForm(){const f=document.getElementById('attendanceForm');if(f)f.style.display='block';}
+async function addAttendance(){
+    const sel=document.getElementById('aDriver');
+    if(!sel.value){alert('Select a driver');return;}
+    const date=document.getElementById('aDate').value;
+    if(!date){alert('Date required');return;}
+    const {error}=await window.sb.from('lota_attendance').insert([{driver_id:sel.value,driver_name:sel.options[sel.selectedIndex]?.dataset?.name||'',date:date,status:document.getElementById('aStatus').value,notes:document.getElementById('aNotes').value.trim()}]);
+    if(error){alert('Error: '+error.message);return;}
+    document.getElementById('attendanceForm').style.display='none';await loadAttendance();
+}
+async function deleteAttendance(id){if(!confirm('Remove attendance record?'))return;await window.sb.from('lota_attendance').delete().eq('id',id);await loadAttendance();}
+
 
 async function loadRoutes(){
     const {data}=await window.sb.from('lota_routes').select('*').order('from_location');
