@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L.O.T.A - Marshal</title>
+<title>ULDTS - Marshal</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="supabase-init.js"></script>
@@ -62,7 +62,7 @@ main.shell { padding:1.5rem; max-width:760px; margin:0 auto; }
     <div class="glow1"></div>
     <div class="login-card">
         <div class="login-logo"><i class="fas fa-taxi" style="color:white;font-size:1.4rem;"></i></div>
-        <h1>L.O.T.A Marshal</h1>
+        <h1>ULDTS Marshal</h1>
         <p class="sub">Rank &amp; Queue Operations</p>
         <div id="errorMsg" class="error-msg"></div>
         <div class="field"><label>Username</label><input id="loginUsername" placeholder="Username"></div>
@@ -75,7 +75,7 @@ main.shell { padding:1.5rem; max-width:760px; margin:0 auto; }
     <nav class="topnav">
         <div class="brand">
             <div class="logo"><i class="fas fa-taxi" style="color:white;font-size:1rem;"></i></div>
-            <div><div class="name">L.O.T.A</div><div class="sub">Marshal Console</div></div>
+            <div><div class="name">ULDTS</div><div class="sub">Marshal Console</div></div>
         </div>
         <button onclick="marshalLogout()" class="btn-secondary"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </nav>
@@ -223,20 +223,65 @@ async function removeFromQueue(id) {
 
 checkSession();
 </script>
-<div id="passengerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:999;overflow-y:auto;padding:1rem;">
-<div style="max-width:600px;margin:2rem auto;background:#0d2137;border:1px solid rgba(0,210,180,0.2);border-radius:20px;padding:2rem;">
+<!-- Insurance Info Modal -->
+<div id="insuranceModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:1100;overflow-y:auto;padding:1rem;">
+<div style="max-width:500px;margin:2rem auto;background:#0d2137;border:1px solid rgba(0,210,180,0.2);border-radius:20px;padding:2rem;">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-<h2 style="color:#00d4b4;font-weight:800;"><i class="fas fa-user-plus"></i> Register Passenger</h2>
-<button onclick="closePassengerForm()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">×</button>
+<h2 style="color:#00d4b4;font-weight:800;"><i class="fas fa-shield-alt"></i> Travel Insurance</h2>
+<button onclick="document.getElementById('insuranceModal').style.display='none'" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">×</button>
+</div>
+<p style="color:rgba(255,255,255,0.6);margin-bottom:1.5rem;font-size:0.9rem;">Protect yourself every time you travel. Our travel insurance covers you for unexpected events during your journey.</p>
+<div style="background:rgba(0,210,180,0.08);border:1px solid rgba(0,210,180,0.2);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+<span style="color:#00d4b4;font-weight:700;">Basic Cover</span><span style="color:#fbbf24;font-weight:800;">R5/trip</span>
+</div>
+<ul style="color:rgba(255,255,255,0.6);font-size:0.85rem;padding-left:1rem;">
+<li>Accidental injury cover</li><li>Emergency medical transport</li>
+</ul>
+</div>
+<div style="background:rgba(0,210,180,0.08);border:1px solid rgba(0,210,180,0.2);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+<span style="color:#00d4b4;font-weight:700;">Standard Cover</span><span style="color:#fbbf24;font-weight:800;">R10/trip</span>
+</div>
+<ul style="color:rgba(255,255,255,0.6);font-size:0.85rem;padding-left:1rem;">
+<li>All Basic benefits</li><li>Lost or stolen belongings (up to R500)</li><li>Trip cancellation cover</li>
+</ul>
+</div>
+<div style="background:rgba(0,210,180,0.08);border:1px solid rgba(0,210,180,0.2);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+<span style="color:#00d4b4;font-weight:700;">Premium Cover</span><span style="color:#fbbf24;font-weight:800;">R20/trip</span>
+</div>
+<ul style="color:rgba(255,255,255,0.6);font-size:0.85rem;padding-left:1rem;">
+<li>All Standard benefits</li><li>Death & disability benefit</li><li>Legal assistance</li>
+</ul>
+</div>
+<div style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);border-radius:10px;padding:0.75rem;margin-bottom:1.5rem;text-align:center;">
+<span style="color:#fbbf24;font-size:0.85rem;font-weight:700;">🚧 Coming Soon — Full packages launching shortly</span>
+</div>
+<button onclick="document.getElementById('insuranceModal').style.display='none'" class="btn-primary">Close</button>
+</div>
 </div>
 
-<div class="field">
-<label>Destination Route *</label>
-<select id="pRoute"><option value="">Select route...</option></select>
+<!-- Passenger Registration Modal -->
+<div id="passengerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:999;overflow-y:auto;padding:1rem;">
+<div style="max-width:620px;margin:1rem auto;background:#0d2137;border:1px solid rgba(0,210,180,0.2);border-radius:20px;padding:2rem;">
+
+<!-- Header -->
+<div style="text-align:center;margin-bottom:2rem;">
+<div style="font-size:3rem;margin-bottom:0.5rem;">🚌</div>
+<h2 style="color:#00d4b4;font-weight:900;font-size:1.6rem;">Welcome to ULDTS</h2>
+<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">Please fill in your details to register your trip</p>
 </div>
 
+<!-- Step 1: Personal Info -->
+<div id="pStep1">
+<h3 style="color:#00d4b4;font-weight:700;margin-bottom:1rem;font-size:1rem;text-transform:uppercase;letter-spacing:0.05em;">Step 1 of 3 — Personal Information</h3>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-<div class="field"><label>Age</label><input type="number" id="pAge" placeholder="Age" min="1" max="120"></div>
+<div class="field"><label>First Name *</label><input type="text" id="pFirstName" placeholder="Your first name"></div>
+<div class="field"><label>Surname *</label><input type="text" id="pSurname" placeholder="Your surname"></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+<div class="field"><label>Age</label><input type="number" id="pAge" placeholder="Your age" min="1" max="120"></div>
 <div class="field"><label>Gender</label>
 <select id="pGender">
 <option value="">Select...</option>
@@ -246,7 +291,6 @@ checkSession();
 <option value="prefer_not">Prefer not to say</option>
 </select></div>
 </div>
-
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
 <div class="field"><label>Ethnic Group</label>
 <select id="pEthnic">
@@ -258,6 +302,27 @@ checkSession();
 <option value="other">Other</option>
 <option value="prefer_not">Prefer not to say</option>
 </select></div>
+<div class="field"><label>Type of Phone</label>
+<select id="pPhone">
+<option value="">Select...</option>
+<option value="smartphone">Smartphone</option>
+<option value="tablet">Tablet</option>
+<option value="feature_phone">Feature/Mobile Phone</option>
+</select></div>
+</div>
+<div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+<button onclick="pGoStep(2)" class="btn-primary" style="width:auto;padding:0.75rem 2rem;">Next <i class="fas fa-arrow-right"></i></button>
+</div>
+</div>
+
+<!-- Step 2: Trip Info -->
+<div id="pStep2" style="display:none;">
+<h3 style="color:#00d4b4;font-weight:700;margin-bottom:1rem;font-size:1rem;text-transform:uppercase;letter-spacing:0.05em;">Step 2 of 3 — Trip Details</h3>
+<div class="field"><label>Point of Departure *</label><input type="text" id="pDeparture" placeholder="Where are you departing from?"></div>
+<div class="field"><label>Destination Route *</label>
+<select id="pRoute"><option value="">Select destination...</option></select>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
 <div class="field"><label>Reason for Travel</label>
 <select id="pReason">
 <option value="">Select...</option>
@@ -268,30 +333,19 @@ checkSession();
 <option value="shopping">Shopping</option>
 <option value="other">Other</option>
 </select></div>
-</div>
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
 <div class="field"><label>Trip Type</label>
 <select id="pTripType">
 <option value="single">Single Trip</option>
 <option value="return">Return Trip</option>
 </select></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
 <div class="field"><label>Trips Per Month</label>
 <select id="pTripsMonth">
 <option value="1-5">1 - 5</option>
 <option value="6-10">6 - 10</option>
 <option value="11-20">11 - 20</option>
 <option value="20+">More than 20</option>
-</select></div>
-</div>
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-<div class="field"><label>Type of Phone</label>
-<select id="pPhone">
-<option value="">Select...</option>
-<option value="smartphone">Smartphone</option>
-<option value="tablet">Tablet</option>
-<option value="feature_phone">Feature/Mobile Phone</option>
 </select></div>
 <div class="field"><label>Preferred Travel Time</label>
 <select id="pPrefTime">
@@ -304,26 +358,60 @@ checkSession();
 <option value="night">Night (20:00+)</option>
 </select></div>
 </div>
-
-<div style="background:rgba(0,210,180,0.08);border:1px solid rgba(0,210,180,0.2);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
-<div style="display:flex;align-items:center;gap:0.75rem;">
-<input type="checkbox" id="pInsurance" style="width:20px;height:20px;accent-color:#00d4b4;">
-<label for="pInsurance" style="color:white;font-size:0.95rem;margin:0;text-transform:none;letter-spacing:0;"><i class="fas fa-shield-alt" style="color:#00d4b4;"></i> I want travel insurance for this trip</label>
+<div style="display:flex;justify-content:space-between;margin-top:1rem;">
+<button onclick="pGoStep(1)" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
+<button onclick="pGoStep(3)" class="btn-primary" style="width:auto;padding:0.75rem 2rem;">Next <i class="fas fa-arrow-right"></i></button>
 </div>
 </div>
 
-<div style="display:flex;gap:0.75rem;">
-<button onclick="submitPassenger()" class="btn-primary"><i class="fas fa-check"></i> Register & Assign Seat</button>
-<button onclick="closePassengerForm()" class="btn-secondary">Cancel</button>
+<!-- Step 3: Insurance -->
+<div id="pStep3" style="display:none;">
+<h3 style="color:#00d4b4;font-weight:700;margin-bottom:1rem;font-size:1rem;text-transform:uppercase;letter-spacing:0.05em;">Step 3 of 3 — Travel Insurance</h3>
+<div style="background:rgba(0,210,180,0.06);border:1px solid rgba(0,210,180,0.15);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem;">
+<p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-bottom:1rem;">Protect yourself during your journey with affordable travel insurance.</p>
+<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+<input type="checkbox" id="pInsurance" style="width:22px;height:22px;accent-color:#00d4b4;">
+<label for="pInsurance" style="color:white;font-size:1rem;margin:0;text-transform:none;letter-spacing:0;font-weight:600;"><i class="fas fa-shield-alt" style="color:#00d4b4;"></i> Yes, I want travel insurance</label>
 </div>
+<a onclick="document.getElementById('insuranceModal').style.display='block'" style="color:#00d4b4;font-size:0.85rem;cursor:pointer;text-decoration:underline;"><i class="fas fa-info-circle"></i> View packages & pricing</a>
+</div>
+<div style="display:flex;justify-content:space-between;margin-top:1rem;">
+<button onclick="pGoStep(2)" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
+<button onclick="submitPassenger()" class="btn-primary" style="width:auto;padding:0.75rem 2rem;"><i class="fas fa-check"></i> Register My Trip</button>
+</div>
+</div>
+
+<!-- Success Screen -->
+<div id="pSuccess" style="display:none;text-align:center;padding:2rem 0;">
+<div style="font-size:5rem;color:#00d4b4;margin-bottom:1rem;">✅</div>
+<h2 style="color:#00d4b4;font-weight:900;font-size:1.8rem;margin-bottom:0.5rem;">You're Registered!</h2>
+<p style="color:rgba(255,255,255,0.6);margin-bottom:2rem;">Your seat has been reserved. Please proceed to:</p>
+<div style="background:rgba(0,210,180,0.1);border:2px solid rgba(0,210,180,0.4);border-radius:16px;padding:1.5rem;margin-bottom:2rem;">
+<div id="pTaxiInfo" style="font-size:1.1rem;color:white;font-weight:700;line-height:1.8;"></div>
+</div>
+<button onclick="closePassengerForm()" class="btn-primary">Done</button>
+</div>
+
 </div>
 </div>
 
 <script>
+function pGoStep(n) {
+    document.getElementById('pStep1').style.display = n===1?'block':'none';
+    document.getElementById('pStep2').style.display = n===2?'block':'none';
+    document.getElementById('pStep3').style.display = n===3?'block':'none';
+}
+
 function showPassengerForm() {
     const sel = document.getElementById('pRoute');
-    sel.innerHTML = '<option value="">Select route...</option>' + mRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} → ${r.to_location}</option>`).join('');
+    sel.innerHTML = '<option value="">Select destination...</option>' + mRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} → ${r.to_location}</option>`).join('');
+    pGoStep(1);
+    document.getElementById('pSuccess').style.display = 'none';
     document.getElementById('passengerModal').style.display = 'block';
+    // Reset form
+    ['pFirstName','pSurname','pAge','pDeparture'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    ['pGender','pEthnic','pPhone','pReason','pTripType','pTripsMonth','pPrefTime'].forEach(id => { const el=document.getElementById(id); if(el) el.selectedIndex=0; });
+    document.getElementById('pInsurance').checked = false;
 }
 
 function closePassengerForm() {
@@ -332,7 +420,13 @@ function closePassengerForm() {
 
 async function submitPassenger() {
     const routeId = document.getElementById('pRoute').value;
-    if (!routeId) { alert('Please select a route'); return; }
+    const firstName = document.getElementById('pFirstName').value.trim();
+    const surname = document.getElementById('pSurname').value.trim();
+    const departure = document.getElementById('pDeparture').value.trim();
+
+    if (!firstName || !surname) { alert('Please enter your first name and surname'); pGoStep(1); return; }
+    if (!departure) { alert('Please enter your point of departure'); pGoStep(2); return; }
+    if (!routeId) { alert('Please select your destination'); pGoStep(2); return; }
 
     const routeLabel = document.getElementById('pRoute').options[document.getElementById('pRoute').selectedIndex].dataset.label || '';
 
@@ -340,13 +434,13 @@ async function submitPassenger() {
     const taxi = mQueue.filter(q => q.route_id === routeId && q.status !== 'departed' && q.seats_filled < q.capacity)
                        .sort((a,b) => new Date(a.created_at) - new Date(b.created_at))[0];
 
-    if (!taxi) { alert('No available taxi in queue for this route'); return; }
+    if (!taxi) { alert('No available taxi in queue for this route. Please ask the marshal for assistance.'); return; }
 
     // Increment seat
     const newSeats = taxi.seats_filled + 1;
     const newStatus = newSeats >= taxi.capacity ? 'full' : 'loading';
     const { error: seatErr } = await window.sb.from('lota_queue').update({ seats_filled: newSeats, status: newStatus }).eq('id', taxi.id);
-    if (seatErr) { alert('Error updating seat: ' + seatErr.message); return; }
+    if (seatErr) { alert('Error: ' + seatErr.message); return; }
 
     // Save passenger data
     await window.sb.from('lota_passengers').insert([{
@@ -361,12 +455,23 @@ async function submitPassenger() {
         trips_per_month: document.getElementById('pTripsMonth').value,
         phone_type: document.getElementById('pPhone').value || null,
         preferred_time: document.getElementById('pPrefTime').value || null,
-        insurance: document.getElementById('pInsurance').checked
+        insurance: document.getElementById('pInsurance').checked,
+        passenger_name: firstName + ' ' + surname,
+        point_of_departure: departure
     }]);
 
-    closePassengerForm();
     await loadQueue();
-    alert(`✅ Passenger registered! Assigned to ${taxi.plate_number} (${newSeats}/${taxi.capacity} seats)`);
+
+    // Show success with taxi info
+    pGoStep(1);
+    document.getElementById('pStep1').style.display = 'none';
+    document.getElementById('pSuccess').style.display = 'block';
+    document.getElementById('pTaxiInfo').innerHTML = `
+        <div style="margin-bottom:0.5rem;">🚌 <strong>Taxi:</strong> ${taxi.plate_number}</div>
+        ${taxi.bay_number ? `<div style="margin-bottom:0.5rem;">🅿️ <strong>Bay Number:</strong> ${taxi.bay_number}</div>` : ''}
+        <div style="margin-bottom:0.5rem;">📍 <strong>Route:</strong> ${routeLabel}</div>
+        <div>💺 <strong>Seat:</strong> ${newSeats} of ${taxi.capacity}</div>
+    `;
 }
 </script>
 </body>
