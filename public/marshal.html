@@ -535,6 +535,12 @@ async function submitPassenger(){
   `;
 }
 
+async function loadRoutesPublic() {
+  const { data } = await window.sb.from('lota_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
+  mRoutes = data || [];
+}
+
+loadRoutesPublic();
 checkSession();
 </script>
 </body>
