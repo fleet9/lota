@@ -476,7 +476,11 @@ function pGoStep(n){
   });
 }
 
-function showPassengerForm(){
+async function showPassengerForm(){
+  if(mRoutes.length===0){
+    const{data}=await window.sb.from('lota_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
+    mRoutes=data||[];
+  }
   const sel=document.getElementById('pRoute');
   if(sel) sel.innerHTML='<option value="">Select your destination...</option>'+(mRoutes.map(r=>`<option value="${r.id}" data-label="${r.from_location} to ${r.to_location}">${r.from_location} \u2192 ${r.to_location}</option>`).join(''));
   pGoStep(1);
