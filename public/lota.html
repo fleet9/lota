@@ -5,7 +5,7 @@
 <script src="sentry-monitoring.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L.O.T.A - Local Operations Taxi Association</title>
+    <title>ULDTS - Local Operations Taxi Association</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="supabase-init.js"></script>
@@ -136,7 +136,7 @@
             <div style="width:64px;height:64px;background:linear-gradient(135deg,#00d4b4,#00a896);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 8px 24px rgba(0,212,180,0.4);">
                 <i class="fas fa-taxi" style="font-size:1.8rem;color:white;"></i>
             </div>
-            <h1 style="font-size:1.6rem;font-weight:900;color:#00d4b4;letter-spacing:2px;text-shadow:0 0 30px rgba(0,212,180,0.4);">L.O.T.A</h1>
+            <h1 style="font-size:1.6rem;font-weight:900;color:#00d4b4;letter-spacing:2px;text-shadow:0 0 30px rgba(0,212,180,0.4);">ULDTS</h1>
             <p style="color:rgba(255,255,255,0.4);font-size:0.875rem;margin-top:0.25rem;">Local Operations Taxi Association</p>
         </div>
         <div style="margin-bottom:1rem;">
@@ -150,7 +150,7 @@
         <button onclick="lotaLogin()" class="btn-primary" style="width:100%;padding:0.85rem;font-size:1rem;">
             <i class="fas fa-sign-in-alt"></i> Sign In
         </button>
-        <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:0.75rem;margin-top:1.5rem;">L.O.T.A Management System v1.0</p>
+        <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:0.75rem;margin-top:1.5rem;">ULDTS Management System v1.0</p>
     </div>
 </div>
 
@@ -163,7 +163,7 @@
             <div style="width:36px;height:36px;background:linear-gradient(135deg,#00d4b4,#00a896);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,212,180,0.3);">
                 <i class="fas fa-taxi" style="color:white;font-size:1rem;"></i>
             </div>
-            <span style="font-weight:800;color:#00d4b4;letter-spacing:1px;">L.O.T.A</span>
+            <span style="font-weight:800;color:#00d4b4;letter-spacing:1px;">ULDTS</span>
             <span style="color:rgba(255,255,255,0.3);font-size:0.75rem;">Management System</span>
         </div>
         <div style="display:flex;align-items:center;gap:1rem;">
@@ -286,7 +286,7 @@ async function loadDashboard() {
     const fees = (fRes.data||[]).reduce((s,t)=>s+parseFloat(t.amount||0),0);
     const queue = qRes.data||[];
     document.getElementById('mod-dashboard').innerHTML = `
-    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;color:#1a202c;">Dashboard</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">L.O.T.A operations overview</p></div>
+    <div style="margin-bottom:1.5rem;"><h2 style="font-size:1.3rem;font-weight:800;color:#1a202c;">Dashboard</h2><p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">ULDTS operations overview</p></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
         <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Members</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${(mRes.data||[]).length}</p></div>
         <div class="stat-card"><p style="color:rgba(255,255,255,0.35);font-size:0.78rem;font-weight:600;text-transform:uppercase;">Vehicles</p><p style="font-size:2rem;font-weight:900;color:#00d4b4;">${(vRes.data||[]).length}</p></div>
@@ -772,7 +772,7 @@ async function loadIncidents(){
             <div><label>Status</label><select id="iStatus"><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></div>
             <div style="grid-column:1/-1;"><label>Description</label><textarea id="iDesc" placeholder="Describe the incident..." style="height:80px;resize:vertical;"></textarea></div>
             <div style="grid-column:1/-1;"><label>Action Taken</label><textarea id="iAction" placeholder="Actions taken..." style="height:60px;resize:vertical;"></textarea></div>
-            <div><label>Case Number</label><input id="iCase" placeholder="e.g. LOTA-2024-001"></div>
+            <div><label>Case Number</label><input id="iCase" placeholder="e.g. ULDTS-2024-001"></div>
             <div style="display:flex;align-items:center;gap:0.5rem;padding-top:1.5rem;"><input type="checkbox" id="iEscalated" style="width:auto;"><label style="margin:0;">Escalated</label></div>
             <div style="grid-column:1/-1;"><label>Evidence / Documents</label><textarea id="iEvidence" placeholder="Evidence description, document references..." style="height:60px;resize:vertical;"></textarea></div>
         </div>
@@ -911,7 +911,7 @@ async function generateReport(){
     trips.forEach(t=>{ byHour[new Date(t.departed_at).getHours()]++; });
 
     const w=window.open('','_blank');
-    w.document.write(`<!DOCTYPE html><html><head><title>L.O.T.A Operations Report</title>
+    w.document.write(`<!DOCTYPE html><html><head><title>ULDTS Operations Report</title>
     <style>
         * { box-sizing:border-box; margin:0; padding:0; }
         body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#1a202c; padding:2rem; }
@@ -928,7 +928,7 @@ async function generateReport(){
         .empty { color:#94a3b8; font-size:0.85rem; padding:0.5rem 0; }
         @media print { body { padding:1rem; } }
     </style></head><body>
-    <h1>L.O.T.A Operations Report</h1>
+    <h1>ULDTS Operations Report</h1>
     <div class="sub">Local Operations Taxi Association &middot; ${fromDate.toLocaleDateString('en-ZA')} &ndash; ${toDate.toLocaleDateString('en-ZA')} &middot; Generated ${new Date().toLocaleString('en-ZA')}</div>
 
     <h2>Trips Summary</h2>
