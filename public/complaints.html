@@ -243,7 +243,7 @@ async function submitComplaint() {
     const route = document.getElementById('cRoute').value.trim();
     const vehicle = document.getElementById('cVehicle').value.trim();
 
-    const { error } = await window.sb.from('lota_complaints').insert([{
+    const { error } = await window.sb.from('uldts_complaints').insert([{
         complainant_name: name || null,
         complainant_phone: phone,
         complaint_type: type,

@@ -371,7 +371,7 @@ async function marshalLogin(){
   const username=document.getElementById('loginUsername').value.trim().toLowerCase();
   const pin=document.getElementById('loginPin').value.trim();
   if(!username||!pin){showError('Please enter username and PIN');return;}
-  const{data:profile,error}=await window.sb.from('lota_users').select('*').eq('username',username).eq('is_active',true).single();
+  const{data:profile,error}=await window.sb.from('uldts_users').select('*').eq('username',username).eq('is_active',true).single();
   if(error||!profile){showError('Invalid credentials');return;}
   if(profile.pin!==pin){showError('Invalid credentials');return;}
   currentUser=profile;
@@ -402,15 +402,15 @@ function marshalLogout(){
 
 async function loadRefData(){
   const[vRes,rRes,dRes]=await Promise.all([
-    window.sb.from('lota_vehicles').select('id,plate_number,capacity').eq('status','active').order('plate_number'),
-    window.sb.from('lota_routes').select('id,from_location,to_location').eq('status','active').order('from_location'),
-    window.sb.from('lota_drivers').select('id,full_name').eq('status','active').order('full_name')
+    window.sb.from('uldts_vehicles').select('id,plate_number,capacity').eq('status','active').order('plate_number'),
+    window.sb.from('uldts_routes').select('id,from_location,to_location').eq('status','active').order('from_location'),
+    window.sb.from('uldts_drivers').select('id,full_name').eq('status','active').order('full_name')
   ]);
   mVehicles=vRes.data||[];mRoutes=rRes.data||[];mDrivers=dRes.data||[];
 }
 
 async function loadQueue(){
-  const{data}=await window.sb.from('lota_queue').select('*').not('status','eq','departed').order('created_at');
+  const{data}=await window.sb.from('uldts_queue').select('*').not('status','eq','departed').order('created_at');
   mQueue=data||[];renderQueue();
 }
 
@@ -454,17 +454,17 @@ function renderQueue(){
 async function updateSeats(id,current,capacity,change){
   const n=Math.max(0,Math.min(capacity,current+change));
   const status=n>=capacity?'full':n>0?'loading':'waiting';
-  await window.sb.from('lota_queue').update({seats_filled:n,status}).eq('id',id);
+  await window.sb.from('uldts_queue').update({seats_filled:n,status}).eq('id',id);
   await loadQueue();
 }
 async function markDeparted(id){
   if(!confirm('Mark this taxi as departed?'))return;
-  await window.sb.from('lota_queue').update({status:'departed',departed_at:new Date().toISOString()}).eq('id',id);
+  await window.sb.from('uldts_queue').update({status:'departed',departed_at:new Date().toISOString()}).eq('id',id);
   await loadQueue();
 }
 async function removeFromQueue(id){
   if(!confirm('Remove from queue?'))return;
-  await window.sb.from('lota_queue').delete().eq('id',id);
+  await window.sb.from('uldts_queue').delete().eq('id',id);
   await loadQueue();
 }
 
@@ -481,11 +481,11 @@ function pGoStep(n){
 
 async function showPassengerForm(){
   if(mRoutes.length===0){
-    const{data}=await window.sb.from('lota_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
+    const{data}=await window.sb.from('uldts_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
     mRoutes=data||[];
   }
   if(mQueue.length===0){
-    const{data:qdata}=await window.sb.from('lota_queue').select('*').not('status','eq','departed').order('created_at');
+    const{data:qdata}=await window.sb.from('uldts_queue').select('*').not('status','eq','departed').order('created_at');
     mQueue=qdata||[];
   }
   const sel=document.getElementById('pRoute');
@@ -517,9 +517,9 @@ async function submitPassenger(){
   if(!taxi){alert('No available taxi for this route at this time. Please ask the marshal for assistance.');return;}
   const newSeats=taxi.seats_filled+1;
   const newStatus=newSeats>=taxi.capacity?'full':'loading';
-  const{error:seatErr}=await window.sb.from('lota_queue').update({seats_filled:newSeats,status:newStatus}).eq('id',taxi.id);
+  const{error:seatErr}=await window.sb.from('uldts_queue').update({seats_filled:newSeats,status:newStatus}).eq('id',taxi.id);
   if(seatErr){alert('An error occurred. Please try again.');return;}
-  await window.sb.from('lota_passengers').insert([{
+  await window.sb.from('uldts_passengers').insert([{
     route_id:routeId,queue_id:taxi.id,route_label:routeLabel,
     age:parseInt(document.getElementById('pAge').value)||null,
     gender:document.getElementById('pGender').value||null,
@@ -547,7 +547,7 @@ async function submitPassenger(){
 }
 
 async function loadRoutesPublic() {
-  const { data } = await window.sb.from('lota_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
+  const { data } = await window.sb.from('uldts_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
   mRoutes = data || [];
 }
 
