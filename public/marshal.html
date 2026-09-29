@@ -100,7 +100,6 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
 .ins-pkg-name{font-weight:700;color:white;margin-bottom:0.35rem}
 .ins-pkg-features{color:var(--muted);font-size:0.82rem;line-height:1.6}
 .ins-pkg-price{font-size:1.3rem;font-weight:900;color:var(--teal);white-space:nowrap}
-.ins-coming{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:0.75rem 1rem;text-align:center;color:#fbbf24;font-size:0.82rem;font-weight:600;margin-top:1rem}
 
 /* SUCCESS SCREEN */
 .success-screen{display:none;text-align:center;padding:3rem 2rem}
@@ -286,13 +285,27 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
     <div class="step-title"><i class="fas fa-shield-alt"></i> Travel Insurance</div>
     <div style="background:rgba(0,212,180,0.04);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;">
       <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;margin-bottom:1.25rem;">Travel insurance protects you against unexpected events during your journey — including accidents, lost belongings, and emergencies.</p>
-      <label style="display:flex;align-items:center;gap:0.85rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:1rem;color:white;font-weight:600;">
-        <input type="checkbox" id="pInsurance" style="width:20px;height:20px;accent-color:var(--teal);flex-shrink:0;">
-        I would like travel insurance for this trip
-      </label>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
+          <input type="radio" name="insurancePkg" value="none" id="pInsNone" checked style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          No insurance
+        </label>
+        <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
+          <input type="radio" name="insurancePkg" value="basic" id="pInsBasic" data-price="5" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          Basic Cover &mdash; R5/trip
+        </label>
+        <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
+          <input type="radio" name="insurancePkg" value="standard" id="pInsStandard" data-price="10" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          Standard Cover &mdash; R10/trip
+        </label>
+        <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
+          <input type="radio" name="insurancePkg" value="premium" id="pInsPremium" data-price="20" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          Premium Cover &mdash; R20/trip
+        </label>
+      </div>
       <div style="margin-top:1rem;">
         <a onclick="document.getElementById('insuranceModal').style.display='block'" style="color:var(--teal);font-size:0.83rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;opacity:0.8;">
-          <i class="fas fa-info-circle"></i> View available packages &amp; pricing
+          <i class="fas fa-info-circle"></i> View package benefits
         </a>
       </div>
     </div>
@@ -346,7 +359,6 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
     </div>
     <div class="ins-pkg-price">R20<span style="font-size:0.75rem;font-weight:500;color:var(--muted);">/trip</span></div>
   </div>
-  <div class="ins-coming"><i class="fas fa-clock"></i> &nbsp;Full package activation coming soon</div>
   <button onclick="document.getElementById('insuranceModal').style.display='none'" class="btn-primary" style="margin-top:1.5rem;">Close</button>
 </div>
 </div>
@@ -495,7 +507,7 @@ async function showPassengerForm(){
   document.getElementById('pStep1').classList.add('active');
   ['pFirstName','pSurname','pAge','pDeparture'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['pGender','pEthnic','pPhone','pReason','pTripType','pTripsMonth','pPrefTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
-  document.getElementById('pInsurance').checked=false;
+  document.getElementById('pInsNone').checked=true;
   document.getElementById('passengerModal').style.display='block';
 }
 
@@ -515,11 +527,15 @@ async function submitPassenger(){
   const routeLabel=routeOpt.dataset.label||routeOpt.text||'';
   const taxi=mQueue.filter(q=>q.route_id===routeId&&q.status!=='departed'&&q.seats_filled<q.capacity).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))[0];
   if(!taxi){alert('No available taxi for this route at this time. Please ask the marshal for assistance.');return;}
-  const newSeats=taxi.seats_filled+1;
-  const newStatus=newSeats>=taxi.capacity?'full':'loading';
-  const{error:seatErr}=await window.sb.from('uldts_queue').update({seats_filled:newSeats,status:newStatus}).eq('id',taxi.id);
-  if(seatErr){alert('An error occurred. Please try again.');return;}
-  await window.sb.from('uldts_passengers').insert([{
+
+  const insSelected=document.querySelector('input[name="insurancePkg"]:checked');
+  const insPkg=(insSelected&&insSelected.value!=='none')?insSelected.value:null;
+  const insPrice=(insSelected&&insSelected.dataset.price)?parseFloat(insSelected.dataset.price):null;
+
+  const submitBtn=document.querySelector('#pStep3 .btn-primary');
+  if(submitBtn){submitBtn.disabled=true;submitBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Submitting...';}
+
+  const{error:insertErr}=await window.sb.from('uldts_passengers').insert([{
     route_id:routeId,queue_id:taxi.id,route_label:routeLabel,
     age:parseInt(document.getElementById('pAge').value)||null,
     gender:document.getElementById('pGender').value||null,
@@ -529,20 +545,37 @@ async function submitPassenger(){
     trips_per_month:document.getElementById('pTripsMonth').value,
     phone_type:document.getElementById('pPhone').value||null,
     preferred_time:document.getElementById('pPrefTime').value||null,
-    insurance:document.getElementById('pInsurance').checked,
+    insurance:!!insPkg,
+    insurance_package:insPkg,
+    insurance_price:insPrice,
     passenger_name:firstName+' '+surname,
     point_of_departure:departure
   }]);
+
+  if(insertErr){
+    console.error('Passenger insert failed:',insertErr);
+    if(submitBtn){submitBtn.disabled=false;submitBtn.innerHTML='<i class="fas fa-check"></i> &nbsp;Confirm Registration';}
+    alert('Could not complete registration. Please try again or ask the marshal for assistance.');
+    return;
+  }
+
+  const newSeats=taxi.seats_filled+1;
+  const newStatus=newSeats>=taxi.capacity?'full':'loading';
+  const{error:seatErr}=await window.sb.from('uldts_queue').update({seats_filled:newSeats,status:newStatus}).eq('id',taxi.id);
+  if(seatErr){console.error('Seat count update failed after successful passenger insert:',seatErr);}
+
   await loadQueue();
   [1,2,3].forEach(i=>{document.getElementById('pStep'+i).classList.remove('active');});
   document.getElementById('pSuccess').style.display='block';
+  const pkgLabels={basic:'Basic Cover (R5)',standard:'Standard Cover (R10)',premium:'Premium Cover (R20)'};
+  const pkgLabel=insPkg?pkgLabels[insPkg]:null;
   document.getElementById('pTaxiInfo').innerHTML=`
     <div class="assignment-row"><span class="assignment-label">Passenger</span><span class="assignment-value">${firstName} ${surname}</span></div>
     <div class="assignment-row"><span class="assignment-label">Taxi</span><span class="assignment-highlight">${taxi.plate_number}</span></div>
     ${taxi.bay_number?`<div class="assignment-row"><span class="assignment-label">Bay Number</span><span class="assignment-highlight">${taxi.bay_number}</span></div>`:''}
     <div class="assignment-row"><span class="assignment-label">Route</span><span class="assignment-value">${routeLabel}</span></div>
     <div class="assignment-row"><span class="assignment-label">Seat</span><span class="assignment-value">${newSeats} of ${taxi.capacity}</span></div>
-    ${document.getElementById('pInsurance').checked?'<div class="assignment-row"><span class="assignment-label">Insurance</span><span class="assignment-value" style="color:#34d399;">Requested ✓</span></div>':''}
+    ${pkgLabel?`<div class="assignment-row"><span class="assignment-label">Insurance</span><span class="assignment-value" style="color:#34d399;">${pkgLabel} \u2713</span></div>`:''}
   `;
 }
 
