@@ -171,7 +171,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
   <div class="reg-header">
     <h2>Trip Registration</h2>
     <p>Complete all steps to be assigned your taxi and boarding bay</p>
-    <div class="step-indicator">
+    <div class="step-indicator" style="display:none">
       <div class="step-dot active" id="sd1">1</div>
       <div class="step-line" id="sl1"></div>
       <div class="step-dot" id="sd2">2</div>
@@ -188,6 +188,10 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       <div class="field"><label>First Name *</label><input id="pFirstName" placeholder="Enter first name"></div>
       <div class="field"><label>Surname *</label><input id="pSurname" placeholder="Enter surname"></div>
     </div>
+    <div class="field"><label>Passenger Cellphone Number *</label><input type="tel" id="pCell" placeholder="e.g. 0821234567"></div>
+    <div class="field"><label>Next of Kin Name *</label><input id="pKinName" placeholder="Enter next of kin name"></div>
+    <div class="field"><label>Next of Kin Cellphone Number *</label><input type="tel" id="pKinCell" placeholder="e.g. 0831234567"></div>
+    <div style="display:none">
     <div class="grid-2">
       <div class="field"><label>Age</label><input type="number" id="pAge" placeholder="Your age" min="1" max="120"></div>
       <div class="field"><label>Gender</label>
@@ -221,9 +225,14 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
         </select>
       </div>
     </div>
+    </div>
+    <div class="field"><label>Destination *</label>
+      <select id="pRoute"><option value="">Select your destination...</option></select>
+    </div>
+    <div class="field"><label>Fare Price (R) *</label><input type="number" id="pFare" placeholder="e.g. 45" min="0" step="0.01"></div>
     <div class="reg-nav">
       <button onclick="closeSelfService()" class="btn-secondary">Cancel</button>
-      <button onclick="pGoStep(2)" class="btn-primary">Continue &nbsp;<i class="fas fa-arrow-right"></i></button>
+      <button onclick="submitPassenger()" class="btn-primary"><i class="fas fa-check"></i> &nbsp;Confirm Registration</button>
     </div>
   </div>
 
@@ -231,9 +240,6 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
   <div class="reg-step" id="pStep2">
     <div class="step-title"><i class="fas fa-route"></i> Trip Details</div>
     <div class="field"><label>Point of Departure *</label><input id="pDeparture" placeholder="Where are you travelling from?"></div>
-    <div class="field"><label>Destination *</label>
-      <select id="pRoute"><option value="">Select your destination...</option></select>
-    </div>
     <div class="grid-2">
       <div class="field"><label>Purpose of Travel</label>
         <select id="pReason">
@@ -505,7 +511,7 @@ async function showPassengerForm(){
   pGoStep(1);
   document.getElementById('pSuccess').style.display='none';
   document.getElementById('pStep1').classList.add('active');
-  ['pFirstName','pSurname','pAge','pDeparture'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['pFirstName','pSurname','pAge','pDeparture','pCell','pKinName','pKinCell','pFare'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['pGender','pEthnic','pPhone','pReason','pTripType','pTripsMonth','pPrefTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
   document.getElementById('pInsNone').checked=true;
   document.getElementById('passengerModal').style.display='block';
@@ -521,8 +527,11 @@ async function submitPassenger(){
   const firstName=document.getElementById('pFirstName').value.trim();
   const surname=document.getElementById('pSurname').value.trim();
   const departure=document.getElementById('pDeparture').value.trim();
-  if(!firstName||!surname){alert('Please enter your first name and surname.');pGoStep(1);return;}
-  if(!departure||!routeId){alert('Please complete your trip details.');pGoStep(2);return;}
+  const cell=document.getElementById('pCell').value.trim();
+  const kinName=document.getElementById('pKinName').value.trim();
+  const kinCell=document.getElementById('pKinCell').value.trim();
+  const fare=parseFloat(document.getElementById('pFare').value);
+  if(!firstName||!surname||!cell||!kinName||!kinCell||isNaN(fare)||!routeId){alert('Please complete all fields.');return;}
   const routeOpt=document.getElementById('pRoute').options[document.getElementById('pRoute').selectedIndex];
   const routeLabel=routeOpt.dataset.label||routeOpt.text||'';
   const taxi=mQueue.filter(q=>q.route_id===routeId&&q.status!=='departed'&&q.seats_filled<q.capacity).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))[0];
@@ -532,7 +541,7 @@ async function submitPassenger(){
   const insPkg=(insSelected&&insSelected.value!=='none')?insSelected.value:null;
   const insPrice=(insSelected&&insSelected.dataset.price)?parseFloat(insSelected.dataset.price):null;
 
-  const submitBtn=document.querySelector('#pStep3 .btn-primary');
+  const submitBtn=document.querySelector('#pStep1 .btn-primary');
   if(submitBtn){submitBtn.disabled=true;submitBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Submitting...';}
 
   const{error:insertErr}=await window.sb.from('uldts_passengers').insert([{
@@ -549,7 +558,11 @@ async function submitPassenger(){
     insurance_package:insPkg,
     insurance_price:insPrice,
     passenger_name:firstName+' '+surname,
-    point_of_departure:departure
+    point_of_departure:departure,
+    passenger_cell:cell,
+    next_of_kin_name:kinName,
+    next_of_kin_cell:kinCell,
+    fare_price:fare
   }]);
 
   if(insertErr){
