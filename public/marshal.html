@@ -568,7 +568,7 @@ async function submitPassenger(){
   if(insertErr){
     console.error('Passenger insert failed:',insertErr);
     if(submitBtn){submitBtn.disabled=false;submitBtn.innerHTML='<i class="fas fa-check"></i> &nbsp;Confirm Registration';}
-    alert('Could not complete registration. Please try again or ask the marshal for assistance.');
+    alert('Could not complete registration: '+(insertErr.message||'unknown error'));
     return;
   }
 
