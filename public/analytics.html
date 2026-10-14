@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L.O.T.A Analytics | Kuzile Advisory</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#070d17;--card:#0f1a2b;--b:rgba(255,255,255,.08);--t:#00d4b4;--m:#8796ab}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:#e8eef7;font-family:system-ui,sans-serif;padding:1rem}
+.wrap{max-width:1300px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:center;margin-bottom:1rem}
+h1{font-size:1.3rem}h1 span{color:var(--t)}
+.bar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select,button{background:var(--card);color:#fff;border:1px solid var(--b);border-radius:8px;padding:.5rem .7rem;font-size:.85rem}
+button{cursor:pointer;background:var(--t);color:#04211d;font-weight:700;border:0}
+button.s{background:var(--card);color:#fff;border:1px solid var(--b)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-bottom:1rem}
+.k{background:var(--card);border:1px solid var(--b);border-radius:12px;padding:.8rem}
+.k p{color:var(--m);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em}.k b{font-size:1.25rem;color:var(--t)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:.8rem;margin-bottom:.8rem}
+.c{background:var(--card);border:1px solid var(--b);border-radius:12px;padding:.9rem;overflow-x:auto}
+.c h3{font-size:.85rem;margin-bottom:.5rem;color:#cfe}
+.c canvas{max-height:260px}
+.ins{background:var(--card);border:1px solid var(--b);border-left:3px solid var(--t);border-radius:12px;padding:.9rem;margin-bottom:1rem;font-size:.88rem;line-height:1.7}
+.hm{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:.6rem;color:var(--m);min-width:620px}
+.hm div{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#e8eef7}
+table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;border-bottom:1px solid var(--b);text-align:left}th{color:var(--m)}
+#gate{max-width:360px;margin:20vh auto;text-align:center}#gate input{width:100%;margin:.8rem 0}
+.none{color:var(--m);font-size:.8rem;padding:2rem 0;text-align:center}
+</style></head><body>
+<div id="gate"><h1>L.O.T.A <span>Analytics</span></h1><p style="color:var(--m);font-size:.85rem;margin-top:.4rem">Enter your access code</p>
+<input id="code" placeholder="Access code" onkeydown="if(event.key==='Enter')enter()"><button onclick="enter()" style="width:100%">Access dashboard</button><p id="gerr" style="color:#f87171;font-size:.8rem;margin-top:.6rem"></p></div>
+<div class="wrap" id="app" style="display:none">
+<header><h1>L.O.T.A <span>Passenger Analytics</span></h1>
+<div class="bar"><input type="date" id="ff" onchange="render()"><input type="date" id="ft" onchange="render()"><select id="fr" onchange="render()"></select>
+<button class="s" onclick="refresh()">Refresh</button><button onclick="pdf()">Export PDF</button></div></header>
+<div class="kpis" id="kp"></div><div class="ins" id="ins"></div>
+<div class="grid" id="charts"></div>
+<div class="c" style="margin-bottom:.8rem"><h3>Demand heatmap: weekday x hour</h3><div id="hm"></div></div>
+<div class="c"><h3>Route summary</h3><table id="rt"></table></div>
+<p style="color:var(--m);font-size:.7rem;margin-top:1rem;text-align:center">Aggregated, anonymised data. Kuzile Advisory.</p></div>
+<script>
+const sb=supabase.createClient('https://zikdqvxvcyyydlyghdsk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppa2Rxdnh2Y3l5eWRseWdoZHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MjIxODcsImV4cCI6MjA5ODI5ODE4N30.7i9KQQeaacGk6XDELu168UBox7X8VCpkLiBJaILroeI');
+const $=id=>document.getElementById(id);
+Chart.defaults.color='#8796ab';Chart.defaults.animation=false;Chart.defaults.borderColor='rgba(255,255,255,.07)';
+const PAL=['#00d4b4','#6366f1','#f59e0b','#ef4444','#22c55e','#ec4899','#38bdf8','#a78bfa','#f97316','#14b8a6'];
+const W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],WF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const L={male:'Male',female:'Female',other:'Other',prefer_not:'Undisclosed',black_african:'Black African',coloured:'Coloured',indian_asian:'Indian / Asian',white:'White',smartphone:'Smartphone',tablet:'Tablet',feature_phone:'Feature phone',work:'Work',leisure:'Leisure',education:'Education',medical:'Medical',shopping:'Shopping',single:'Single',return:'Return',early_morning:'Early morning',morning:'Morning',midday:'Midday',afternoon:'Afternoon',evening:'Evening',night:'Night',basic:'Basic (R5)',standard:'Standard (R10)',premium:'Premium (R20)',none:'No insurance'};
+let ALL=[],ROWS=[],CH={};
+const ymd=d=>d.toLocaleDateString('en-CA');
+const fm=n=>'R'+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+const pc=(a,b)=>Math.round(100*a/b)+'%';
+const e=s=>String(s).replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';');
+const cnt=(rs,fn)=>{const m={};rs.forEach(r=>{const k=fn(r);if(k!==null&&k!==undefined&&k!=='')m[k]=(m[k]||0)+1});return m};
+const sum=(rs,kf,vf)=>{const m={};rs.forEach(r=>{const k=kf(r),v=vf(r);if(k&&v!=null&&!isNaN(+v))m[k]=(m[k]||0)+ +v});return m};
+const top=(m,n)=>Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,n);
+const srt=m=>Object.entries(m).sort((a,b)=>a[0]<b[0]?-1:1);
+const nm=m=>top(m,12).map(([k,v])=>[L[k]||k,v]);
+const ord=(m,ks)=>ks.filter(k=>m[k]).map(k=>[L[k]||k,m[k]]);
+const hmat=r=>{const m=Array.from({length:7},()=>Array(24).fill(0));r.forEach(x=>m[x.d.getDay()][x.d.getHours()]++);return m};
+const CFG=[
+['day','Passengers per day','line',r=>srt(cnt(r,x=>ymd(x.d)))],
+['rev','Fare revenue per day (R)','bar',r=>srt(sum(r,x=>ymd(x.d),x=>x.fare_price))],
+['cum','Cumulative passengers','line',r=>{let c=0;return srt(cnt(r,x=>ymd(x.d))).map(([k,v])=>[k,c+=v])}],
+['hr','Passengers by hour of day','bar',r=>{const m=cnt(r,x=>x.d.getHours());return[...Array(24).keys()].map(h=>[h+':00',m[h]||0])}],
+['wd','Passengers by weekday','bar',r=>{const m=cnt(r,x=>x.d.getDay());return W.map((w,i)=>[w,m[i]||0])}],
+['mo','Passengers per month','bar',r=>srt(cnt(r,x=>ymd(x.d).slice(0,7)))],
+['rv','Top routes by passengers','bar',r=>top(cnt(r,x=>x.route_label),10),'y'],
+['rr','Top routes by revenue (R)','bar',r=>top(sum(r,x=>x.route_label,x=>x.fare_price),10),'y'],
+['ra','Average fare by route (R)','bar',r=>{const s=sum(r,x=>x.route_label,x=>x.fare_price),c=cnt(r.filter(x=>x.fare_price!=null),x=>x.route_label);return top(Object.fromEntries(Object.keys(s).map(k=>[k,Math.round(s[k]/c[k]*100)/100])),10)}],
+['rs','Route share of passengers','doughnut',r=>top(cnt(r,x=>x.route_label),8)],
+['dp','Top points of departure','bar',r=>top(cnt(r,x=>(x.point_of_departure||'').trim()),10),'y'],
+['fd','Fare distribution (R)','bar',r=>{const f=r.map(x=>x.fare_price).filter(v=>v!=null).map(Number);if(!f.length)return[];const mx=Math.max(...f),w=Math.max(5,Math.ceil(mx/8/5)*5),m={};f.forEach(v=>{const b=Math.floor(v/w)*w;m[b]=(m[b]||0)+1});const o=[];for(let b=0;b<=Math.floor(mx/w)*w;b+=w)o.push(['R'+b+'-'+(b+w),m[b]||0]);return o}],
+['ge','Gender','doughnut',r=>nm(cnt(r,x=>x.gender))],
+['ag','Age groups','bar',r=>{const B=[['Under 18',0,17],['18-24',18,24],['25-34',25,34],['35-44',35,44],['45-54',45,54],['55-64',55,64],['65+',65,200]],a=r.map(x=>x.age).filter(v=>v>0);return a.length?B.map(([n,lo,hi])=>[n,a.filter(v=>v>=lo&&v<=hi).length]):[]}],
+['et','Ethnic group','doughnut',r=>nm(cnt(r,x=>x.ethnic_group))],
+['ph','Device type','doughnut',r=>nm(cnt(r,x=>x.phone_type))],
+['tr','Purpose of travel','doughnut',r=>nm(cnt(r,x=>x.travel_reason))],
+['tt','Trip type','doughnut',r=>nm(cnt(r,x=>x.trip_type))],
+['tm','Trips per month','bar',r=>ord(cnt(r,x=>x.trips_per_month),['1-5','6-10','11-20','20+'])],
+['pt','Preferred departure time','bar',r=>ord(cnt(r,x=>x.preferred_time),['early_morning','morning','midday','afternoon','evening','night'])],
+['in','Insurance uptake','doughnut',r=>nm(cnt(r,x=>x.insurance_package||'none'))]];
+function kp(r){const f=r.map(x=>x.fare_price).filter(v=>v!=null).map(Number),rev=f.reduce((a,b)=>a+b,0),days=new Set(r.map(x=>ymd(x.d))).size,bd=top(cnt(r,x=>ymd(x.d)),1)[0],hc=top(cnt(r,x=>x.d.getHours()),1)[0];
+return[['Total passengers',r.length],['Fare revenue',fm(rev)],['Average fare',f.length?fm(rev/f.length):'-'],['Highest fare',f.length?fm(Math.max(...f)):'-'],['Active routes',new Set(r.map(x=>x.route_label).filter(Boolean)).size],['Avg passengers / day',days?(r.length/days).toFixed(1):'-'],['Busiest day',bd?bd[0]+' ('+bd[1]+')':'-'],['Peak hour',hc?hc[0]+':00':'-'],['Insurance uptake',r.length?pc(r.filter(x=>x.insurance).length,r.length):'-']]}
+function insights(r){if(!r.length)return['No passenger data for this selection.'];
+const o=[],t=r.length,mx=m=>top(m,1)[0],H=mx(cnt(r,x=>x.d.getHours())),D=mx(cnt(r,x=>x.d.getDay())),RT=mx(cnt(r,x=>x.route_label)),DY=mx(cnt(r,x=>ymd(x.d)));
+o.push(`Peak hour is ${H[0]}:00 with ${pc(H[1],t)} of all passengers.`);
+o.push(`${WF[D[0]]} is the busiest weekday (${pc(D[1],t)} of volume).`);
+if(RT)o.push(`Top route: ${RT[0]} with ${RT[1]} passengers (${pc(RT[1],t)}).`);
+const s=sum(r,x=>x.route_label,x=>x.fare_price),c=cnt(r.filter(x=>x.fare_price!=null),x=>x.route_label),av=Object.keys(s).map(k=>[k,s[k]/c[k]]).sort((a,b)=>b[1]-a[1])[0];
+if(av)o.push(`Highest average fare: ${av[0]} at ${fm(av[1])}.`);
+o.push(`Busiest single day: ${DY[0]} with ${DY[1]} passengers.`);
+const mxd=Math.max(...r.map(x=>+x.d)),L7=r.filter(x=>+x.d>mxd-6048e5).length,P7=r.filter(x=>+x.d<=mxd-6048e5&&+x.d>mxd-12096e5).length;
+if(P7)o.push(`Last 7 days: ${L7} passengers vs ${P7} the week before (${L7>=P7?'+':''}${Math.round(100*(L7-P7)/P7)}%).`);
+const dp=mx(cnt(r,x=>(x.point_of_departure||'').trim()));if(dp)o.push(`Most common departure point: ${dp[0]}.`);
+return o}
+function rtab(r){const c=cnt(r,x=>x.route_label),s=sum(r,x=>x.route_label,x=>x.fare_price),cf=cnt(r.filter(x=>x.fare_price!=null),x=>x.route_label);return top(c,15).map(([k,v])=>[k,v,s[k]||0,cf[k]?s[k]/cf[k]:0,pc(v,r.length)])}
+async function load(code){const{data,error}=await sb.rpc('uldts_client_analytics',{p_code:code});
+if(error){$('gerr').textContent=/invalid/.test(error.message)?'Invalid or expired access code.':error.message;return false}
+ALL=(data||[]).map(r=>({...r,d:new Date(r.created_at)}));try{sessionStorage.setItem('lota_code',code)}catch(x){}return true}
+async function enter(){const c=$('code').value.trim();if(c&&await load(c))start()}
+async function refresh(){let c='';try{c=sessionStorage.getItem('lota_code')||''}catch(x){}if(c&&await load(c))init()}
+function start(){$('gate').style.display='none';$('app').style.display='block';init()}
+function init(){const v=$('fr').value,rs=[...new Set(ALL.map(r=>r.route_label).filter(Boolean))].sort();$('fr').innerHTML='<option value="">All routes</option>'+rs.map(r=>`<option>${e(r)}</option>`).join('');$('fr').value=v;render()}
+function render(){const f=$('ff').value,t=$('ft').value,rt=$('fr').value;
+const r=ROWS=ALL.filter(x=>(!f||ymd(x.d)>=f)&&(!t||ymd(x.d)<=t)&&(!rt||x.route_label===rt));
+$('kp').innerHTML=kp(r).map(([l,v])=>`<div class="k"><p>${l}</p><b>${v}</b></div>`).join('');
+$('ins').innerHTML=insights(r).map(x=>'<div>&bull; '+e(x)+'</div>').join('');
+Object.values(CH).forEach(c=>c.destroy());CH={};
+$('charts').innerHTML=CFG.map(c=>`<div class="c"><h3>${c[1]}</h3><canvas id="c_${c[0]}"></canvas></div>`).join('');
+CFG.forEach(c=>{const d=c[3](r),cv=$('c_'+c[0]);
+if(!d.length||d.every(x=>!x[1])){cv.parentNode.innerHTML=`<h3>${c[1]}</h3><div class="none">No data captured for this selection</div>`;return}
+const dn=c[2]==='doughnut',ln=c[2]==='line';
+CH[c[0]]=new Chart(cv,{type:c[2],data:{labels:d.map(x=>x[0]),datasets:[{data:d.map(x=>x[1]),backgroundColor:dn?PAL:ln?'rgba(0,212,180,.15)':PAL[0],borderColor:dn?'#0f1a2b':PAL[0],fill:ln,tension:.3,borderRadius:4,pointRadius:2}]},options:{indexAxis:c[4]||'x',plugins:{legend:{display:dn,position:'right',labels:{boxWidth:10}}},scales:dn?{}:{y:{beginAtZero:true},x:{ticks:{maxRotation:60}}}}})});
+const m=hmat(r),mx=Math.max(1,...m.flat());
+$('hm').innerHTML='<div class="hm"><div></div>'+[...Array(24).keys()].map(i=>`<div>${i}</div>`).join('')+m.map((row,d)=>`<div>${W[d]}</div>`+row.map(v=>`<div title="${v}" style="background:rgba(0,212,180,${v?(0.15+0.85*v/mx):0.04})">${v||''}</div>`).join('')).join('')+'</div>';
+$('rt').innerHTML='<tr><th>Route</th><th>Passengers</th><th>Revenue</th><th>Avg fare</th><th>Share</th></tr>'+rtab(r).map(a=>`<tr><td>${e(a[0])}</td><td>${a[1]}</td><td>${fm(a[2])}</td><td>${a[3]?fm(a[3]):'-'}</td><td>${a[4]}</td></tr>`).join('')}
+function snap(cv){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const x=c.getContext('2d');x.fillStyle='#0f1a2b';x.fillRect(0,0,c.width,c.height);x.drawImage(cv,0,0);return c.toDataURL('image/png')}
+function pdf(){const d=new window.jspdf.jsPDF('p','mm','a4'),r=ROWS,M=14;let y=36;
+const chk=n=>{if(y+n>284){d.addPage();y=16}};
+d.setFillColor(7,13,23);d.rect(0,0,210,28,'F');d.setTextColor(0,212,180);d.setFontSize(18);d.text('L.O.T.A Passenger Analytics',M,13);
+d.setTextColor(200);d.setFontSize(9);d.text('Kuzile Advisory | Generated '+new Date().toLocaleString('en-ZA')+' | '+($('ff').value||'start')+' to '+($('ft').value||'today')+($('fr').value?' | '+$('fr').value:''),M,21);
+d.setTextColor(30);d.setFontSize(12);d.text('Key metrics',M,y);y+=6;d.setFontSize(10);
+kp(r).forEach(([l,v])=>{d.text(l,M,y);d.text(String(v),90,y);y+=5.5});
+y+=4;d.setFontSize(12);d.text('Insights',M,y);y+=6;d.setFontSize(9.5);
+insights(r).forEach(t=>d.splitTextToSize('- '+t,182).forEach(l=>{chk(6);d.text(l,M,y);y+=5}));
+y+=4;chk(30);d.setFontSize(12);d.text('Route summary',M,y);y+=6;d.setFontSize(8.5);d.setFont('helvetica','bold');
+const cx=[M,88,112,142,168];['Route','Passengers','Revenue','Avg fare','Share'].forEach((h,i)=>d.text(h,cx[i],y));d.setFont('helvetica','normal');y+=5;
+rtab(r).forEach(a=>{chk(6);[d.splitTextToSize(String(a[0]),70)[0],String(a[1]),fm(a[2]),a[3]?fm(a[3]):'-',a[4]].forEach((v,i)=>d.text(v,cx[i],y));y+=5});
+y+=6;chk(70);d.setFontSize(12);d.text('Demand heatmap: weekday x hour',M,y);y+=5;
+const m=hmat(r),mx=Math.max(1,...m.flat());
+m.forEach((row,i)=>{d.setFontSize(7);d.text(W[i],M,y+4+i*6);row.forEach((v,h)=>{const t=v?(0.15+0.85*v/mx):0.04;d.setFillColor(240-240*t,245-75*t,248-98*t);d.rect(M+10+h*7.3,y+i*6,7,5.5,'F')})});
+d.setFontSize(7);for(let h=0;h<24;h+=3)d.text(h+'h',M+10+h*7.3,y+44);y+=52;
+let n=0;Object.keys(CH).forEach(k=>{const cv=CH[k].canvas;if(n%2===0){chk(80)}
+const x=M+(n%2)*94,s=Math.min(88/cv.width,66/cv.height);d.setFontSize(9);d.setTextColor(60);d.text(CFG.find(c=>c[0]===k)[1],x,y);d.addImage(snap(cv),'PNG',x,y+2,cv.width*s,cv.height*s);
+if(n%2===1)y+=74;n++});
+const pg=d.getNumberOfPages();for(let i=1;i<=pg;i++){d.setPage(i);d.setFontSize(7);d.setTextColor(120);d.text('Aggregated and anonymised data. No personal information included. Page '+i+'/'+pg,M,292)}
+d.save('LOTA-Analytics-'+ymd(new Date())+'.pdf')}
+(async()=>{try{const c=sessionStorage.getItem('lota_code');if(c&&await load(c))start()}catch(x){}})();
+</script></body></html>
