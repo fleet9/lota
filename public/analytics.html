@@ -40,7 +40,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;bo
 <div class="c"><h3>Route summary</h3><table id="rt"></table></div>
 <p style="color:var(--m);font-size:.7rem;margin-top:1rem;text-align:center">Aggregated, anonymised data. Kuzile Advisory.</p></div>
 <script>
-const sb=supabase.createClient('https://zikdqvxvcyyydlyghdsk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppa2Rxdnh2Y3l5eWRseWdoZHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MjIxODcsImV4cCI6MjA5ODI5ODE4N30.7i9KQQeaacGk6XDELu168UBox7X8VCpkLiBJaILroeI');
+window.onerror=function(m){alert('Error: '+m)};window.onunhandledrejection=function(v){alert('Error: '+(v.reason&&v.reason.message||v.reason))};const sb=supabase.createClient('https://zikdqvxvcyyydlyghdsk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppa2Rxdnh2Y3l5eWRseWdoZHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MjIxODcsImV4cCI6MjA5ODI5ODE4N30.7i9KQQeaacGk6XDELu168UBox7X8VCpkLiBJaILroeI');
 const $=id=>document.getElementById(id);
 Chart.defaults.color='#8796ab';Chart.defaults.animation=false;Chart.defaults.borderColor='rgba(255,255,255,.07)';
 const PAL=['#00d4b4','#6366f1','#f59e0b','#ef4444','#22c55e','#ec4899','#38bdf8','#a78bfa','#f97316','#14b8a6'];
@@ -98,7 +98,7 @@ function rtab(r){const c=cnt(r,x=>x.route_label),s=sum(r,x=>x.route_label,x=>x.f
 async function load(code){const{data,error}=await sb.rpc('uldts_client_analytics',{p_code:code});
 if(error){$('gerr').textContent=/invalid/.test(error.message)?'Invalid or expired access code.':error.message;return false}
 ALL=(data||[]).map(r=>({...r,d:new Date(r.created_at)}));try{sessionStorage.setItem('lota_code',code)}catch(x){}return true}
-async function enter(){const c=$('code').value.trim();if(c&&await load(c))start()}
+async function enter(){const c=$('code').value.trim();if(!c)return;$('gerr').textContent='Checking...';if(await load(c))start()}
 async function refresh(){let c='';try{c=sessionStorage.getItem('lota_code')||''}catch(x){}if(c&&await load(c))init()}
 function start(){$('gate').style.display='none';$('app').style.display='block';init()}
 function init(){const v=$('fr').value,rs=[...new Set(ALL.map(r=>r.route_label).filter(Boolean))].sort();$('fr').innerHTML='<option value="">All routes</option>'+rs.map(r=>`<option>${e(r)}</option>`).join('');$('fr').value=v;render()}
