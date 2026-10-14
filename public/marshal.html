@@ -574,7 +574,7 @@ async function submitPassenger(){
 
   const newSeats=taxi.seats_filled+1;
   const newStatus=newSeats>=taxi.capacity?'full':'loading';
-  const{error:seatErr}=await window.sb.from('uldts_queue').update({seats_filled:newSeats,status:newStatus}).eq('id',taxi.id);
+  const{error:seatErr}=await window.sb.rpc('uldts_add_seat',{p_queue_id:taxi.id});
   if(seatErr){console.error('Seat count update failed after successful passenger insert:',seatErr);}
 
   await loadQueue();
