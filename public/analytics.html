@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>L.O.T.A Analytics | Kuzile Advisory</title>
+<title>ULDTS Analytics | Kuzile Advisory</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -28,10 +28,10 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;bo
 #gate{max-width:360px;margin:20vh auto;text-align:center}#gate input{width:100%;margin:.8rem 0}
 .none{color:var(--m);font-size:.8rem;padding:2rem 0;text-align:center}
 </style></head><body>
-<div id="gate"><h1>L.O.T.A <span>Analytics</span></h1><p style="color:var(--m);font-size:.85rem;margin-top:.4rem">Enter your access code</p>
+<div id="gate"><h1>ULDTS <span>Analytics</span></h1><p style="color:var(--m);font-size:.85rem;margin-top:.4rem">Enter your access code</p>
 <input id="code" placeholder="Access code" onkeydown="if(event.key==='Enter')enter()"><button onclick="enter()" style="width:100%">Access dashboard</button><p id="gerr" style="color:#b91c1c;font-size:.8rem;margin-top:.6rem"></p></div>
 <div class="wrap" id="app" style="display:none">
-<header><h1>L.O.T.A <span>Passenger Analytics</span></h1>
+<header><h1>ULDTS <span>Passenger Analytics</span></h1>
 <div class="bar"><input type="date" id="ff" onchange="render()"><input type="date" id="ft" onchange="render()"><select id="fr" onchange="render()"></select>
 <button class="s" onclick="refresh()">Refresh</button><button onclick="pdf()">Export PDF</button></div></header>
 <div class="kpis" id="kp"></div><div class="ins" id="ins"></div>
@@ -97,9 +97,9 @@ return o}
 function rtab(r){const c=cnt(r,x=>x.route_label),s=sum(r,x=>x.route_label,x=>x.fare_price),cf=cnt(r.filter(x=>x.fare_price!=null),x=>x.route_label);return tp(c,15).map(([k,v])=>[k,v,s[k]||0,cf[k]?s[k]/cf[k]:0,pc(v,r.length)])}
 async function load(code){const{data,error}=await sb.rpc('uldts_client_analytics',{p_code:code});
 if(error){$('gerr').textContent=/invalid/.test(error.message)?'Invalid or expired access code.':error.message;return false}
-ALL=(data||[]).map(r=>({...r,d:new Date(r.created_at)}));try{sessionStorage.setItem('lota_code',code)}catch(x){}return true}
+ALL=(data||[]).map(r=>({...r,d:new Date(r.created_at)}));try{sessionStorage.setItem('uldts_code',code)}catch(x){}return true}
 async function enter(){const c=$('code').value.trim();if(!c)return;$('gerr').textContent='Checking...';if(await load(c))start()}
-async function refresh(){let c='';try{c=sessionStorage.getItem('lota_code')||''}catch(x){}if(c&&await load(c))init()}
+async function refresh(){let c='';try{c=sessionStorage.getItem('uldts_code')||''}catch(x){}if(c&&await load(c))init()}
 function start(){$('gate').style.display='none';$('app').style.display='block';init()}
 function init(){const v=$('fr').value,rs=[...new Set(ALL.map(r=>r.route_label).filter(Boolean))].sort();$('fr').innerHTML='<option value="">All routes</option>'+rs.map(r=>`<option>${e(r)}</option>`).join('');$('fr').value=v;render()}
 function render(){const f=$('ff').value,t=$('ft').value,rt=$('fr').value;
@@ -118,7 +118,7 @@ $('rt').innerHTML='<tr><th>Route</th><th>Passengers</th><th>Revenue</th><th>Avg 
 function snap(cv){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(cv,0,0);return c.toDataURL('image/png')}
 function pdf(){const d=new window.jspdf.jsPDF('p','mm','a4'),r=ROWS,M=14;let y=36;
 const chk=n=>{if(y+n>284){d.addPage();y=16}};
-d.setFillColor(234,88,12);d.rect(0,0,210,28,'F');d.setTextColor(255,255,255);d.setFontSize(18);d.text('L.O.T.A Passenger Analytics',M,13);
+d.setFillColor(234,88,12);d.rect(0,0,210,28,'F');d.setTextColor(255,255,255);d.setFontSize(18);d.text('ULDTS Passenger Analytics',M,13);
 d.setTextColor(255,237,220);d.setFontSize(9);d.text('Kuzile Advisory | Generated '+new Date().toLocaleString('en-ZA')+' | '+($('ff').value||'start')+' to '+($('ft').value||'today')+($('fr').value?' | '+$('fr').value:''),M,21);
 d.setTextColor(30);d.setFontSize(12);d.text('Key metrics',M,y);y+=6;d.setFontSize(10);
 kp(r).forEach(([l,v])=>{d.text(l,M,y);d.text(String(v),90,y);y+=5.5});
@@ -135,6 +135,6 @@ let n=0;Object.keys(CH).forEach(k=>{const cv=CH[k].canvas;if(n%2===0){chk(80)}
 const x=M+(n%2)*94,s=Math.min(88/cv.width,66/cv.height);d.setFontSize(9);d.setTextColor(60);d.text(CFG.find(c=>c[0]===k)[1],x,y);d.addImage(snap(cv),'PNG',x,y+2,cv.width*s,cv.height*s);
 if(n%2===1)y+=74;n++});
 const pg=d.getNumberOfPages();for(let i=1;i<=pg;i++){d.setPage(i);d.setFontSize(7);d.setTextColor(120);d.text('Aggregated and anonymised data. No personal information included. Page '+i+'/'+pg,M,292)}
-d.save('LOTA-Analytics-'+ymd(new Date())+'.pdf')}
-(async()=>{try{const c=sessionStorage.getItem('lota_code');if(c&&await load(c))start()}catch(x){}})();
+d.save('ULDTS-Analytics-'+ymd(new Date())+'.pdf')}
+(async()=>{try{const c=sessionStorage.getItem('uldts_code');if(c&&await load(c))start()}catch(x){}})();
 </script></body></html>
