@@ -391,9 +391,8 @@ async function marshalLogin(){
   const username=document.getElementById('loginUsername').value.trim().toLowerCase();
   const pin=document.getElementById('loginPin').value.trim();
   if(!username||!pin){showError('Please enter username and PIN');return;}
-  const{data:profile,error}=await window.sb.from('uldts_users').select('*').eq('username',username).eq('is_active',true).single();
+  const{data:profile,error}=await window.sb.rpc('uldts_marshal_login',{p_username:username,p_pin:pin});
   if(error||!profile){showError('Invalid credentials');return;}
-  if(profile.pin!==pin){showError('Invalid credentials');return;}
   currentUser=profile;
   document.getElementById('marshalLogin').style.display='none';
   document.getElementById('welcomeScreen').style.display='none';
