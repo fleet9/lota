@@ -500,7 +500,7 @@ function pGoStep(n){
 }
 
 async function showPassengerForm(){
-  if(mRoutes.length===0){
+  {
     const{data}=await window.sb.from('uldts_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
     mRoutes=data||[];
   }
