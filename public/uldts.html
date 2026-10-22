@@ -178,7 +178,7 @@ async function initApp() {
     document.getElementById('navUsername').textContent = currentUser.full_name||currentUser.username;
     await Promise.all([loadMembers(), loadVehicles(), loadDrivers(), loadRoutes()]);
     await loadDashboard();
-    setInterval(() => { loadQueue(); loadDashboard(); }, 30000);
+    setInterval(() => { const f=document.getElementById('queueForm'); if(!(f&&f.style.display&&f.style.display!=='none')) loadQueue(); loadDashboard(); }, 30000);
 }
 
 function showModule(mod, el) {
