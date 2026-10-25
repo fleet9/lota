@@ -27,8 +27,7 @@ button.s{background:linear-gradient(180deg,#fff,#f3f4f6);color:#374151;border:1p
 table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;border-bottom:1px solid var(--b);text-align:left}th{color:var(--m)}
 #gate{max-width:360px;margin:20vh auto;text-align:center}#gate input{width:100%;margin:.8rem 0}
 .none{color:var(--m);font-size:.8rem;padding:2rem 0;text-align:center}
-</style><style id="f9dark">:root{--bg:#0b0b0d;--card:#17181b;--b:rgba(255,255,255,.10);--t:#ff6b00;--m:#9a9ca3}body{background:radial-gradient(1100px 600px at 85% -10%,rgba(255,107,0,.10),transparent 60%),linear-gradient(135deg,#08080a,#141518 50%,#0b0b0d) fixed!important;color:#e8e8ea!important}input,select,textarea{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.14)!important;color:#fff!important}select option{background:#17181b!important;color:#fff!important}input::placeholder{color:rgba(255,255,255,.35)!important}button.s{background:rgba(255,255,255,.07)!important;color:#e8e8ea!important;border:1px solid rgba(255,255,255,.14)!important}.k,.c,.ins{background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035))!important;-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 10px 36px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)!important}.k b{color:#ff8a3d!important}.c h3{color:#e8e8ea!important}.hm div{color:#e8e8ea!important}td,th{border-bottom-color:rgba(255,255,255,.08)!important}[style*="color:#b91c1c"]{color:#f87171!important}</style>
-</head><body>
+</style></head><body>
 <div id="gate"><h1>ULDTS <span>Analytics</span></h1><p style="color:var(--m);font-size:.85rem;margin-top:.4rem">Enter your access code</p>
 <input id="code" placeholder="Access code" onkeydown="if(event.key==='Enter')enter()"><button onclick="enter()" style="width:100%">Access dashboard</button><p id="gerr" style="color:#b91c1c;font-size:.8rem;margin-top:.6rem"></p></div>
 <div class="wrap" id="app" style="display:none">
@@ -43,8 +42,8 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;bo
 <script>
 window.onerror=function(m){alert('Error: '+m)};window.onunhandledrejection=function(v){alert('Error: '+(v.reason&&v.reason.message||v.reason))};const sb=supabase.createClient('https://mljeivqcamheylldkmcs.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1samVpdnFjYW1oZXlsbGRrbWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NTQ5MjMsImV4cCI6MjA4MTAzMDkyM30.KOwwzJ6fkkqKBfBDYzOhOIYEPv3dRJ5GJtDAtQAC9zg');
 const $=id=>document.getElementById(id);
-Chart.defaults.color='#9a9ca3';Chart.defaults.animation=false;Chart.defaults.borderColor='rgba(255,255,255,.08)';
-const PAL=['#ff6b00','#9a9ca3','#ff9a55','#d1d5db','#ffb27a','#6b7280','#ffd0a8','#4b5563','#e55d00','#b4b6bd'];
+Chart.defaults.color='#6b7280';Chart.defaults.animation=false;Chart.defaults.borderColor='rgba(17,24,39,.08)';
+const PAL=['#f97316','#6b7280','#ea580c','#9ca3af','#fb923c','#374151','#fdba74','#d1d5db','#c2410c','#4b5563'];
 const W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],WF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const L={male:'Male',female:'Female',other:'Other',prefer_not:'Undisclosed',black_african:'Black African',coloured:'Coloured',indian_asian:'Indian / Asian',white:'White',smartphone:'Smartphone',tablet:'Tablet',feature_phone:'Feature phone',work:'Work',leisure:'Leisure',education:'Education',medical:'Medical',shopping:'Shopping',single:'Single',return:'Return',early_morning:'Early morning',morning:'Morning',midday:'Midday',afternoon:'Afternoon',evening:'Evening',night:'Night',basic:'Basic (R5)',standard:'Standard (R10)',premium:'Premium (R20)',none:'No insurance'};
 let ALL=[],ROWS=[],CH={};
@@ -112,11 +111,11 @@ $('charts').innerHTML=CFG.map(c=>`<div class="c"><h3>${c[1]}</h3><canvas id="c_$
 CFG.forEach(c=>{const d=c[3](r),cv=$('c_'+c[0]);
 if(!d.length||d.every(x=>!x[1])){cv.parentNode.innerHTML=`<h3>${c[1]}</h3><div class="none">No data captured for this selection</div>`;return}
 const dn=c[2]==='doughnut',ln=c[2]==='line';
-CH[c[0]]=new Chart(cv,{type:c[2],data:{labels:d.map(x=>x[0]),datasets:[{data:d.map(x=>x[1]),backgroundColor:dn?PAL:ln?'rgba(249,115,22,.15)':PAL[0],borderColor:dn?'#17181b':PAL[0],fill:ln,tension:.3,borderRadius:4,pointRadius:2}]},options:{indexAxis:c[4]||'x',plugins:{legend:{display:dn,position:'right',labels:{boxWidth:10}}},scales:dn?{}:{y:{beginAtZero:true},x:{ticks:{maxRotation:60}}}}})});
+CH[c[0]]=new Chart(cv,{type:c[2],data:{labels:d.map(x=>x[0]),datasets:[{data:d.map(x=>x[1]),backgroundColor:dn?PAL:ln?'rgba(249,115,22,.15)':PAL[0],borderColor:dn?'#ffffff':PAL[0],fill:ln,tension:.3,borderRadius:4,pointRadius:2}]},options:{indexAxis:c[4]||'x',plugins:{legend:{display:dn,position:'right',labels:{boxWidth:10}}},scales:dn?{}:{y:{beginAtZero:true},x:{ticks:{maxRotation:60}}}}})});
 const m=hmat(r),mx=Math.max(1,...m.flat());
 $('hm').innerHTML='<div class="hm"><div></div>'+[...Array(24).keys()].map(i=>`<div>${i}</div>`).join('')+m.map((row,d)=>`<div>${W[d]}</div>`+row.map(v=>`<div title="${v}" style="background:rgba(249,115,22,${v?(0.15+0.85*v/mx):0.04})">${v||''}</div>`).join('')).join('')+'</div>';
 $('rt').innerHTML='<tr><th>Route</th><th>Passengers</th><th>Revenue</th><th>Avg fare</th><th>Share</th></tr>'+rtab(r).map(a=>`<tr><td>${e(a[0])}</td><td>${a[1]}</td><td>${fm(a[2])}</td><td>${a[3]?fm(a[3]):'-'}</td><td>${a[4]}</td></tr>`).join('')}
-function snap(cv){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const x=c.getContext('2d');x.fillStyle='#17181b';x.fillRect(0,0,c.width,c.height);x.drawImage(cv,0,0);return c.toDataURL('image/png')}
+function snap(cv){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(cv,0,0);return c.toDataURL('image/png')}
 function pdf(){const d=new window.jspdf.jsPDF('p','mm','a4'),r=ROWS,M=14;let y=36;
 const chk=n=>{if(y+n>284){d.addPage();y=16}};
 d.setFillColor(234,88,12);d.rect(0,0,210,28,'F');d.setTextColor(255,255,255);d.setFontSize(18);d.text('ULDTS Passenger Analytics',M,13);
