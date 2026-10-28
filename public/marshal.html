@@ -278,6 +278,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       </div>
     </div>
     <div id="insBox"></div>
+    <div class="field" style="margin-top:.75rem"><label style="display:flex;gap:.6rem;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:.85rem;font-weight:600;color:var(--ink);cursor:pointer"><input type="checkbox" id="pConsent" style="width:18px;height:18px;flex-shrink:0;margin-top:.15rem;accent-color:#f97316"><span>The passenger has been told how their information is used (to provide transport, for safety and next-of-kin contact, and in anonymised statistics) and agrees. They may choose "Prefer not to say" for gender and ethnic group.</span></label></div>
     <div class="reg-nav">
       <button onclick="closeSelfService()" class="btn-secondary">Cancel</button>
       <button onclick="submitPassenger()" class="btn-primary"><i class="fas fa-check"></i> &nbsp;Confirm Registration</button>
@@ -535,6 +536,7 @@ async function showPassengerForm(){
   ['pGender','pEthnic','pPhone','pReason','pTripType','pTripsMonth','pPrefTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
   document.getElementById('pInsNone').checked=true;
   await loadInsurance();
+  var _c=document.getElementById('pConsent');if(_c)_c.checked=false;
   document.getElementById('passengerModal').style.display='block';
 }
 
@@ -557,6 +559,7 @@ async function submitPassenger(){
   if(_need.length){alert('Please complete: '+_need.join(', '));return;}
   const _age=parseInt(document.getElementById('pAge').value);
   if(!(_age>=10&&_age<=110)){alert('Please enter a valid age (10 to 110).');return;}
+  if(!document.getElementById('pConsent').checked){alert('The passenger must agree to the information notice before registering.');return;}
   const routeOpt=document.getElementById('pRoute').options[document.getElementById('pRoute').selectedIndex];
   const routeLabel=routeOpt.dataset.label||routeOpt.text||'';
   const taxi=mQueue.filter(q=>q.route_id===routeId&&q.status!=='departed'&&q.seats_filled<q.capacity).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))[0];
@@ -587,7 +590,7 @@ async function submitPassenger(){
     passenger_cell:cell,
     next_of_kin_name:kinName,
     next_of_kin_cell:kinCell,
-    fare_price:fare
+    fare_price:fare,consent_given:true,consent_at:new Date().toISOString(),consent_version:'2026-10-v1'
   }]);
 
   if(insertErr){
