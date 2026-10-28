@@ -198,8 +198,8 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
     <div class="step-title" style="margin-top:.75rem"><i class="fas fa-chart-pie"></i> About the passenger</div>
     <div id="ps2moved">
     <div class="grid-2">
-      <div class="field"><label>Age</label><input type="number" id="pAge" placeholder="Your age" min="1" max="120"></div>
-      <div class="field"><label>Gender</label>
+      <div class="field"><label>Age *</label><input type="number" id="pAge" placeholder="Your age" min="1" max="120"></div>
+      <div class="field"><label>Gender *</label>
         <select id="pGender">
           <option value="">Select...</option>
           <option value="male">Male</option>
@@ -210,7 +210,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       </div>
     </div>
     <div class="grid-2">
-      <div class="field"><label>Ethnic Group</label>
+      <div class="field"><label>Ethnic Group *</label>
         <select id="pEthnic">
           <option value="">Select...</option>
           <option value="black_african">Black African</option>
@@ -221,7 +221,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
           <option value="prefer_not">Prefer not to say</option>
         </select>
       </div>
-      <div class="field"><label>Type of Device</label>
+      <div class="field"><label>Type of Device *</label>
         <select id="pPhone">
           <option value="">Select...</option>
           <option value="smartphone">Smartphone</option>
@@ -232,13 +232,13 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
     </div>
     </div>
     <div class="step-title" style="margin-top:.75rem"><i class="fas fa-route"></i> Trip details</div>
-    <div class="field"><label>Point of Departure</label><input id="pDeparture" placeholder="Where are you travelling from?"></div>
+    <div class="field"><label>Point of Departure *</label><input id="pDeparture" placeholder="Where are you travelling from?"></div>
     <div class="field"><label>Destination *</label>
       <select id="pRoute"><option value="">Select your destination...</option></select>
     </div>
     <div class="field"><label>Fare Price (R) *</label><input type="number" id="pFare" placeholder="e.g. 45" min="0" step="0.01"></div>
     <div class="grid-2">
-      <div class="field"><label>Purpose of Travel</label>
+      <div class="field"><label>Purpose of Travel *</label>
         <select id="pReason">
           <option value="">Select...</option>
           <option value="work">Work / Employment</option>
@@ -249,7 +249,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
           <option value="other">Other</option>
         </select>
       </div>
-      <div class="field"><label>Trip Type</label>
+      <div class="field"><label>Trip Type *</label>
         <select id="pTripType"><option value="">Select...</option>
           <option value="single">Single Trip</option>
           <option value="return">Return Trip</option>
@@ -257,7 +257,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       </div>
     </div>
     <div class="grid-2">
-      <div class="field"><label>Trips Per Month</label>
+      <div class="field"><label>Trips Per Month *</label>
         <select id="pTripsMonth"><option value="">Select...</option>
           <option value="1-5">1 – 5 trips</option>
           <option value="6-10">6 – 10 trips</option>
@@ -265,7 +265,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
           <option value="20+">More than 20</option>
         </select>
       </div>
-      <div class="field"><label>Preferred Departure Time</label>
+      <div class="field"><label>Preferred Departure Time *</label>
         <select id="pPrefTime">
           <option value="">Select...</option>
           <option value="early_morning">Early Morning (04:00 – 07:00)</option>
@@ -277,6 +277,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
         </select>
       </div>
     </div>
+    <div id="insBox"></div>
     <div class="reg-nav">
       <button onclick="closeSelfService()" class="btn-secondary">Cancel</button>
       <button onclick="submitPassenger()" class="btn-primary"><i class="fas fa-check"></i> &nbsp;Confirm Registration</button>
@@ -299,19 +300,19 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;margin-bottom:1.25rem;">Travel insurance protects you against unexpected events during your journey — including accidents, lost belongings, and emergencies.</p>
       <div style="display:flex;flex-direction:column;gap:0.75rem;">
         <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
-          <input type="radio" name="insurancePkg" value="none" id="pInsNone" checked style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          <input type="radio" name="insurancePkgLegacy" value="none" id="pInsNone" checked style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
           No insurance
         </label>
         <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
-          <input type="radio" name="insurancePkg" value="basic" id="pInsBasic" data-price="5" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          <input type="radio" name="insurancePkgLegacy" value="basic" id="pInsBasic" data-price="5" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
           Basic Cover &mdash; R5/trip
         </label>
         <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
-          <input type="radio" name="insurancePkg" value="standard" id="pInsStandard" data-price="10" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          <input type="radio" name="insurancePkgLegacy" value="standard" id="pInsStandard" data-price="10" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
           Standard Cover &mdash; R10/trip
         </label>
         <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.95rem;color:white;font-weight:600;">
-          <input type="radio" name="insurancePkg" value="premium" id="pInsPremium" data-price="20" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
+          <input type="radio" name="insurancePkgLegacy" value="premium" id="pInsPremium" data-price="20" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;">
           Premium Cover &mdash; R20/trip
         </label>
       </div>
@@ -533,6 +534,7 @@ async function showPassengerForm(){
   ['pFirstName','pSurname','pAge','pDeparture','pCell','pKinName','pKinCell','pFare'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['pGender','pEthnic','pPhone','pReason','pTripType','pTripsMonth','pPrefTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
   document.getElementById('pInsNone').checked=true;
+  await loadInsurance();
   document.getElementById('passengerModal').style.display='block';
 }
 
@@ -551,6 +553,10 @@ async function submitPassenger(){
   const kinCell=document.getElementById('pKinCell').value.trim();
   const fare=parseFloat(document.getElementById('pFare').value);
   if(!firstName||!surname||!cell||!kinName||!kinCell||isNaN(fare)||!routeId){alert('Please complete all fields.');return;}
+  const _need=[['pAge','age'],['pGender','gender'],['pEthnic','ethnic group'],['pPhone','device type'],['pDeparture','point of departure'],['pReason','purpose of travel'],['pTripType','trip type'],['pTripsMonth','trips per month'],['pPrefTime','preferred departure time']].filter(function(q){return !String(document.getElementById(q[0]).value||'').trim()}).map(function(q){return q[1]});
+  if(_need.length){alert('Please complete: '+_need.join(', '));return;}
+  const _age=parseInt(document.getElementById('pAge').value);
+  if(!(_age>=10&&_age<=110)){alert('Please enter a valid age (10 to 110).');return;}
   const routeOpt=document.getElementById('pRoute').options[document.getElementById('pRoute').selectedIndex];
   const routeLabel=routeOpt.dataset.label||routeOpt.text||'';
   const taxi=mQueue.filter(q=>q.route_id===routeId&&q.status!=='departed'&&q.seats_filled<q.capacity).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))[0];
@@ -599,8 +605,8 @@ async function submitPassenger(){
   await loadQueue();
   [1,2,3].forEach(i=>{document.getElementById('pStep'+i).classList.remove('active');});
   document.getElementById('pSuccess').style.display='block';
-  const pkgLabels={basic:'Basic Cover (R5)',standard:'Standard Cover (R10)',premium:'Premium Cover (R20)'};
-  const pkgLabel=insPkg?pkgLabels[insPkg]:null;
+  
+  const pkgLabel=insPkg?((window.INSPKGS||[]).filter(function(p){return p.code===insPkg}).map(function(p){return p.name+' (R'+p.price+')'})[0]||insPkg):null;
   document.getElementById('pTaxiInfo').innerHTML=`
     <div class="assignment-row"><span class="assignment-label">Passenger</span><span class="assignment-value">${firstName} ${surname}</span></div>
     <div class="assignment-row"><span class="assignment-label">Taxi</span><span class="assignment-highlight">${taxi.plate_number}</span></div>
@@ -611,6 +617,14 @@ async function submitPassenger(){
   `;
 }
 
+window.INSPKGS=[];
+async function loadInsurance(){
+  const box=document.getElementById('insBox');if(!box)return;
+  try{const{data}=await window.sb.from('insurance_packages').select('code,name,price,benefits').eq('active',true).order('sort_order').order('price');window.INSPKGS=data||[];}catch(e){window.INSPKGS=[];}
+  const E=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return '&#'+c.charCodeAt(0)+';'})};
+  const row=function(id,val,price,title,sub){return '<label style="display:flex;gap:.6rem;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:.6rem;cursor:pointer"><input type="radio" name="insurancePkg" id="'+id+'" value="'+E(val)+'"'+(price!=null?' data-price="'+E(price)+'"':'')+(val==='none'?' checked':'')+' style="width:18px;height:18px;flex-shrink:0;margin-top:.15rem;accent-color:#f97316"><span>'+E(title)+(sub?'<span style="display:block;font-weight:400;font-size:.8rem;color:var(--muted)">'+E(sub)+'</span>':'')+'</span></label>';};
+  box.innerHTML='<div class="step-title" style="margin-top:.75rem"><i class="fas fa-shield-alt"></i> Travel insurance</div>'+row('pInsNone2','none',null,'No insurance','')+window.INSPKGS.map(function(p){return row('ins_'+p.code,p.code,p.price,p.name+' - R'+p.price+'/trip',p.benefits||'')}).join('');
+}
 async function loadRoutesPublic() {
   const { data } = await window.sb.from('uldts_routes').select('id,from_location,to_location').eq('status','active').order('from_location');
   mRoutes = data || [];
