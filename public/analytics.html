@@ -32,7 +32,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;bo
 <input id="code" placeholder="Access code" onkeydown="if(event.key==='Enter')enter()"><button onclick="enter()" style="width:100%">Access dashboard</button><p id="gerr" style="color:#b91c1c;font-size:.8rem;margin-top:.6rem"></p></div>
 <div class="wrap" id="app" style="display:none">
 <header><h1>ULDTS <span>Passenger Analytics</span></h1>
-<div class="bar"><input type="date" id="ff" onchange="render()"><input type="date" id="ft" onchange="render()"><select id="fr" onchange="render()"></select>
+<div class="bar"><input type="date" id="ff" onchange="render()"><input type="date" id="ft" onchange="render()"><select id="fr" onchange="render()"></select><select id="fs" onchange="render()"><option value="">All sources</option><option value="walk_in">Walk-in at rank</option><option value="online">Online bookings</option></select>
 <button class="s" onclick="refresh()">Refresh</button><button onclick="pdf()">Export PDF</button></div></header>
 <div class="kpis" id="kp"></div><div class="ins" id="ins"></div>
 <div class="grid" id="charts"></div>
@@ -58,6 +58,7 @@ const srt=m=>Object.entries(m).sort((a,b)=>a[0]<b[0]?-1:1);
 const nm=m=>tp(m,12).map(([k,v])=>[L[k]||k,v]);
 const ord=(m,ks)=>ks.filter(k=>m[k]).map(k=>[L[k]||k,m[k]]);
 const hmat=r=>{const m=Array.from({length:7},()=>Array(24).fill(0));r.forEach(x=>m[x.d.getDay()][x.d.getHours()]++);return m};
+const SUPK=['ge','ag','et','ph','tr','tt','tm','pt','in'],SUP=a=>{const k=a.filter(x=>x[1]>=5),o=a.filter(x=>x[1]<5).reduce((s,x)=>s+x[1],0);return o>=5?k.concat([['Other (small groups)',o]]):k};
 const CFG=[
 ['day','Passengers per day','line',r=>srt(cnt(r,x=>ymd(x.d)))],
 ['rev','Fare revenue per day (R)','bar',r=>srt(sum(r,x=>ymd(x.d),x=>x.fare_price))],
@@ -79,9 +80,12 @@ const CFG=[
 ['tt','Trip type','doughnut',r=>nm(cnt(r,x=>x.trip_type))],
 ['tm','Trips per month','bar',r=>ord(cnt(r,x=>x.trips_per_month),['1-5','6-10','11-20','20+'])],
 ['pt','Preferred departure time','bar',r=>ord(cnt(r,x=>x.preferred_time),['early_morning','morning','midday','afternoon','evening','night'])],
-['in','Insurance uptake','doughnut',r=>nm(cnt(r,x=>x.insurance_package||'none'))]];
+['in','Insurance uptake','doughnut',r=>nm(cnt(r.filter(x=>(x.source||'walk_in')==='walk_in'),x=>x.insurance_package||'none'))],
+['src','Walk-in vs online','doughnut',r=>top(cnt(r,x=>(x.source||'walk_in')==='online'?'Online booking':'Walk-in at rank'),4)],
+['pst','Online payment status','doughnut',r=>top(cnt(r.filter(x=>x.source==='online'),x=>x.paid?'Paid':'Awaiting payment'),3)],
+['pco','Promo codes used (online)','bar',r=>top(cnt(r.filter(x=>x.promo_code),x=>x.promo_code),8)]];
 function kp(r){const f=r.map(x=>x.fare_price).filter(v=>v!=null).map(Number),rev=f.reduce((a,b)=>a+b,0),days=new Set(r.map(x=>ymd(x.d))).size,bd=tp(cnt(r,x=>ymd(x.d)),1)[0],hc=tp(cnt(r,x=>x.d.getHours()),1)[0];
-return[['Total passengers',r.length],['Fare revenue',fm(rev)],['Average fare',f.length?fm(rev/f.length):'-'],['Highest fare',f.length?fm(Math.max(...f)):'-'],['Active routes',new Set(r.map(x=>x.route_label).filter(Boolean)).size],['Avg passengers / day',days?(r.length/days).toFixed(1):'-'],['Busiest day',bd?bd[0]+' ('+bd[1]+')':'-'],['Peak hour',hc?hc[0]+':00':'-'],['Insurance uptake',r.length?pc(r.filter(x=>x.insurance).length,r.length):'-']]}
+return[['Total passengers',r.length],['Fare revenue',fm(rev)],['Average fare',f.length?fm(rev/f.length):'-'],['Highest fare',f.length?fm(Math.max(...f)):'-'],['Active routes',new Set(r.map(x=>x.route_label).filter(Boolean)).size],['Avg passengers / day',days?(r.length/days).toFixed(1):'-'],['Busiest day',bd?bd[0]+' ('+bd[1]+')':'-'],['Peak hour',hc?hc[0]+':00':'-'],['Insurance uptake',r.length?pc(r.filter(x=>x.insurance).length,Math.max(1,r.filter(x=>(x.source||'walk_in')==='walk_in').length)):'-']]}
 function insights(r){if(!r.length)return['No passenger data for this selection.'];
 const o=[],t=r.length,mx=m=>tp(m,1)[0],H=mx(cnt(r,x=>x.d.getHours())),D=mx(cnt(r,x=>x.d.getDay())),RT=mx(cnt(r,x=>x.route_label)),DY=mx(cnt(r,x=>ymd(x.d)));
 o.push(`Peak hour is ${H[0]}:00 with ${pc(H[1],t)} of all passengers.`);
@@ -102,13 +106,13 @@ async function enter(){const c=$('code').value.trim();if(!c)return;$('gerr').tex
 async function refresh(){let c='';try{c=sessionStorage.getItem('uldts_code')||''}catch(x){}if(c&&await load(c))init()}
 function start(){$('gate').style.display='none';$('app').style.display='block';init()}
 function init(){const v=$('fr').value,rs=[...new Set(ALL.map(r=>r.route_label).filter(Boolean))].sort();$('fr').innerHTML='<option value="">All routes</option>'+rs.map(r=>`<option>${e(r)}</option>`).join('');$('fr').value=v;render()}
-function render(){const f=$('ff').value,t=$('ft').value,rt=$('fr').value;
-const r=ROWS=ALL.filter(x=>(!f||ymd(x.d)>=f)&&(!t||ymd(x.d)<=t)&&(!rt||x.route_label===rt));
+function render(){const f=$('ff').value,t=$('ft').value,rt=$('fr').value,sf=$('fs').value;
+const r=ROWS=ALL.filter(x=>(!f||ymd(x.d)>=f)&&(!t||ymd(x.d)<=t)&&(!rt||x.route_label===rt)&&(!sf||(x.source||'walk_in')===sf));
 $('kp').innerHTML=kp(r).map(([l,v])=>`<div class="k"><p>${l}</p><b>${v}</b></div>`).join('');
 $('ins').innerHTML=insights(r).map(x=>'<div>&bull; '+e(x)+'</div>').join('');
 Object.values(CH).forEach(c=>c.destroy());CH={};
 $('charts').innerHTML=CFG.map(c=>`<div class="c"><h3>${c[1]}</h3><canvas id="c_${c[0]}"></canvas></div>`).join('');
-CFG.forEach(c=>{const d=c[3](r),cv=$('c_'+c[0]);
+CFG.forEach(c=>{let d=c[3](r);if(SUPK.indexOf(c[0])>=0)d=SUP(d);const cv=$('c_'+c[0]);
 if(!d.length||d.every(x=>!x[1])){cv.parentNode.innerHTML=`<h3>${c[1]}</h3><div class="none">No data captured for this selection</div>`;return}
 const dn=c[2]==='doughnut',ln=c[2]==='line';
 CH[c[0]]=new Chart(cv,{type:c[2],data:{labels:d.map(x=>x[0]),datasets:[{data:d.map(x=>x[1]),backgroundColor:dn?PAL:ln?'rgba(249,115,22,.15)':PAL[0],borderColor:dn?'#ffffff':PAL[0],fill:ln,tension:.3,borderRadius:4,pointRadius:2}]},options:{indexAxis:c[4]||'x',plugins:{legend:{display:dn,position:'right',labels:{boxWidth:10}}},scales:dn?{}:{y:{beginAtZero:true},x:{ticks:{maxRotation:60}}}}})});
