@@ -192,9 +192,11 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       <div class="field"><label>Surname *</label><input id="pSurname" placeholder="Enter surname"></div>
     </div>
     <div class="field"><label>Passenger Cellphone Number *</label><input type="tel" id="pCell" placeholder="e.g. 0821234567"></div>
+    <div class="step-title" style="margin-top:.75rem"><i class="fas fa-user-group"></i> Next of kin</div>
     <div class="field"><label>Next of Kin Name *</label><input id="pKinName" placeholder="Enter next of kin name"></div>
     <div class="field"><label>Next of Kin Cellphone Number *</label><input type="tel" id="pKinCell" placeholder="e.g. 0831234567"></div>
-    <div style="display:none">
+    <div class="step-title" style="margin-top:.75rem"><i class="fas fa-chart-pie"></i> About the passenger</div>
+    <div id="ps2moved">
     <div class="grid-2">
       <div class="field"><label>Age</label><input type="number" id="pAge" placeholder="Your age" min="1" max="120"></div>
       <div class="field"><label>Gender</label>
@@ -229,20 +231,12 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
       </div>
     </div>
     </div>
+    <div class="step-title" style="margin-top:.75rem"><i class="fas fa-route"></i> Trip details</div>
+    <div class="field"><label>Point of Departure</label><input id="pDeparture" placeholder="Where are you travelling from?"></div>
     <div class="field"><label>Destination *</label>
       <select id="pRoute"><option value="">Select your destination...</option></select>
     </div>
     <div class="field"><label>Fare Price (R) *</label><input type="number" id="pFare" placeholder="e.g. 45" min="0" step="0.01"></div>
-    <div class="reg-nav">
-      <button onclick="closeSelfService()" class="btn-secondary">Cancel</button>
-      <button onclick="submitPassenger()" class="btn-primary"><i class="fas fa-check"></i> &nbsp;Confirm Registration</button>
-    </div>
-  </div>
-
-  <!-- Step 2 -->
-  <div class="reg-step" id="pStep2">
-    <div class="step-title"><i class="fas fa-route"></i> Trip Details</div>
-    <div class="field"><label>Point of Departure *</label><input id="pDeparture" placeholder="Where are you travelling from?"></div>
     <div class="grid-2">
       <div class="field"><label>Purpose of Travel</label>
         <select id="pReason">
@@ -256,7 +250,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
         </select>
       </div>
       <div class="field"><label>Trip Type</label>
-        <select id="pTripType">
+        <select id="pTripType"><option value="">Select...</option>
           <option value="single">Single Trip</option>
           <option value="return">Return Trip</option>
         </select>
@@ -264,7 +258,7 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
     </div>
     <div class="grid-2">
       <div class="field"><label>Trips Per Month</label>
-        <select id="pTripsMonth">
+        <select id="pTripsMonth"><option value="">Select...</option>
           <option value="1-5">1 – 5 trips</option>
           <option value="6-10">6 – 10 trips</option>
           <option value="11-20">11 – 20 trips</option>
@@ -283,6 +277,15 @@ main.shell{padding:1.5rem;max-width:780px;margin:0 auto}
         </select>
       </div>
     </div>
+    <div class="reg-nav">
+      <button onclick="closeSelfService()" class="btn-secondary">Cancel</button>
+      <button onclick="submitPassenger()" class="btn-primary"><i class="fas fa-check"></i> &nbsp;Confirm Registration</button>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="reg-step" id="pStep2">
+    <div class="step-title"><i class="fas fa-route"></i> Trip Details</div>
     <div class="reg-nav">
       <button onclick="pGoStep(1)" class="btn-secondary"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>
       <button onclick="pGoStep(3)" class="btn-primary">Continue &nbsp;<i class="fas fa-arrow-right"></i></button>
@@ -566,8 +569,8 @@ async function submitPassenger(){
     gender:document.getElementById('pGender').value||null,
     ethnic_group:document.getElementById('pEthnic').value||null,
     travel_reason:document.getElementById('pReason').value||null,
-    trip_type:document.getElementById('pTripType').value,
-    trips_per_month:document.getElementById('pTripsMonth').value,
+    trip_type:document.getElementById('pTripType').value||null,
+    trips_per_month:document.getElementById('pTripsMonth').value||null,
     phone_type:document.getElementById('pPhone').value||null,
     preferred_time:document.getElementById('pPrefTime').value||null,
     insurance:!!insPkg,
