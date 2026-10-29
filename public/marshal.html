@@ -562,6 +562,7 @@ async function submitPassenger(){
   if(!document.getElementById('pConsent').checked){alert('The passenger must agree to the information notice before registering.');return;}
   const routeOpt=document.getElementById('pRoute').options[document.getElementById('pRoute').selectedIndex];
   const routeLabel=routeOpt.dataset.label||routeOpt.text||'';
+  await loadQueue();
   const taxi=mQueue.filter(q=>q.route_id===routeId&&q.status!=='departed'&&q.seats_filled<q.capacity).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))[0];
   if(!taxi){alert('No available taxi for this route at this time. Please ask the marshal for assistance.');return;}
 
