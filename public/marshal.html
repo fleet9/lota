@@ -398,6 +398,7 @@ async function marshalLogin(){
   const pin=document.getElementById('loginPin').value.trim();
   if(!username||!pin){showError('Please enter username and PIN');return;}
   const{data:profile,error}=await window.sb.rpc('uldts_marshal_login',{p_username:username,p_pin:pin});
+  if(error&&/locked/i.test(error.message||'')){showError('Too many attempts. Please try again in 15 minutes.');return;}
   if(error||!profile){showError('Invalid credentials');return;}
   currentUser=profile;
   document.getElementById('marshalLogin').style.display='none';
