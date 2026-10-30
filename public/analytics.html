@@ -40,7 +40,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:.4rem;bo
 <div class="c"><h3>Route summary</h3><table id="rt"></table></div>
 <p style="color:var(--m);font-size:.7rem;margin-top:1rem;text-align:center">Aggregated, anonymised data. Kuzile Advisory.</p></div>
 <script>
-window.onerror=function(m){alert('Error: '+m)};window.onunhandledrejection=function(v){alert('Error: '+(v.reason&&v.reason.message||v.reason))};const sb=supabase.createClient('https://mljeivqcamheylldkmcs.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1samVpdnFjYW1oZXlsbGRrbWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NTQ5MjMsImV4cCI6MjA4MTAzMDkyM30.KOwwzJ6fkkqKBfBDYzOhOIYEPv3dRJ5GJtDAtQAC9zg');
+window.onerror=function(m){console.error(m)};window.onunhandledrejection=function(v){console.error(v.reason)};const sb=supabase.createClient('https://mljeivqcamheylldkmcs.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1samVpdnFjYW1oZXlsbGRrbWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NTQ5MjMsImV4cCI6MjA4MTAzMDkyM30.KOwwzJ6fkkqKBfBDYzOhOIYEPv3dRJ5GJtDAtQAC9zg');
 const $=id=>document.getElementById(id);
 Chart.defaults.color='#6b7280';Chart.defaults.animation=false;Chart.defaults.borderColor='rgba(17,24,39,.08)';
 const PAL=['#f97316','#6b7280','#ea580c','#9ca3af','#fb923c','#374151','#fdba74','#d1d5db','#c2410c','#4b5563'];
@@ -81,9 +81,9 @@ const CFG=[
 ['tm','Trips per month','bar',r=>ord(cnt(r,x=>x.trips_per_month),['1-5','6-10','11-20','20+'])],
 ['pt','Preferred departure time','bar',r=>ord(cnt(r,x=>x.preferred_time),['early_morning','morning','midday','afternoon','evening','night'])],
 ['in','Insurance uptake','doughnut',r=>nm(cnt(r,x=>x.insurance_package||'none'))],
-['src','Walk-in vs online','doughnut',r=>top(cnt(r,x=>(x.source||'walk_in')==='online'?'Online booking':'Walk-in at rank'),4)],
-['pst','Online payment status','doughnut',r=>top(cnt(r.filter(x=>x.source==='online'),x=>x.paid?'Paid':'Awaiting payment'),3)],
-['pco','Promo codes used (online)','bar',r=>top(cnt(r.filter(x=>x.promo_code),x=>x.promo_code),8)]];
+['src','Walk-in vs online','doughnut',r=>tp(cnt(r,x=>(x.source||'walk_in')==='online'?'Online booking':'Walk-in at rank'),4)],
+['pst','Online payment status','doughnut',r=>tp(cnt(r.filter(x=>x.source==='online'),x=>x.paid?'Paid':'Awaiting payment'),3)],
+['pco','Promo codes used (online)','bar',r=>tp(cnt(r.filter(x=>x.promo_code),x=>x.promo_code),8)]];
 function kp(r){const f=r.map(x=>x.fare_price).filter(v=>v!=null).map(Number),rev=f.reduce((a,b)=>a+b,0),days=new Set(r.map(x=>ymd(x.d))).size,bd=tp(cnt(r,x=>ymd(x.d)),1)[0],hc=tp(cnt(r,x=>x.d.getHours()),1)[0];
 return[['Total passengers',r.length],['Fare revenue',fm(rev)],['Average fare',f.length?fm(rev/f.length):'-'],['Highest fare',f.length?fm(Math.max(...f)):'-'],['Active routes',new Set(r.map(x=>x.route_label).filter(Boolean)).size],['Avg passengers / day',days?(r.length/days).toFixed(1):'-'],['Busiest day',bd?bd[0]+' ('+bd[1]+')':'-'],['Peak hour',hc?hc[0]+':00':'-'],['Insurance uptake',r.length?pc(r.filter(x=>x.insurance).length,Math.max(1,r.length)):'-']]}
 function insights(r){if(!r.length)return['No passenger data for this selection.'];
